@@ -1,69 +1,141 @@
-import Image from "next/image";
+import { supabaseAdmin } from "@/lib/supabase/server";
+import type { Category, Transaction } from "@/lib/types";
+import { rupiah, formatDate } from "@/lib/format";
+import { CategoryIcon } from "@/lib/icons";
+import { ArrowDownRight, ArrowUpRight, Wallet } from "lucide-react";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const db = supabaseAdmin();
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+  const [{ data: txs }, { data: categories }] = await Promise.all([
+    db
+      .from("transactions")
+      .select("*")
+      .gte("occurred_at", monthStart)
+      .order("occurred_at", { ascending: false }),
+    db.from("categories").select("*"),
+  ]);
+
+  const transactions = (txs ?? []) as Transaction[];
+  const categoryMap = new Map((categories as Category[] | null ?? []).map((c) => [c.id, c]));
+
+  const totalIncome = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
+  const net = totalIncome - totalExpense;
+
+  const recent = transactions.slice(0, 10);
+
+  const byCategory = new Map<string, number>();
+  for (const t of transactions) {
+    if (t.type !== "expense") continue;
+    const key = t.category_id ?? "uncategorized";
+    byCategory.set(key, (byCategory.get(key) ?? 0) + t.amount);
+  }
+  const breakdown = [...byCategory.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([id, amount]) => ({
+      category: categoryMap.get(id),
+      amount,
+      pct: totalExpense > 0 ? (amount / totalExpense) * 100 : 0,
+    }));
+
+  const monthLabel = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(now);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="flex flex-col gap-8">
+      <div>
+        <h1 className="text-2xl font-semibold text-neutral-100">Dashboard</h1>
+        <p className="text-sm text-neutral-500">Ringkasan {monthLabel}</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="Pemasukan" value={totalIncome} icon={ArrowUpRight} tone="text-emerald-400" />
+        <StatCard label="Pengeluaran" value={totalExpense} icon={ArrowDownRight} tone="text-red-400" />
+        <StatCard label="Saldo Bersih" value={net} icon={Wallet} tone={net >= 0 ? "text-emerald-400" : "text-red-400"} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
+          <h2 className="mb-4 text-sm font-semibold text-neutral-300">Transaksi Terbaru</h2>
+          {recent.length === 0 ? (
+            <p className="text-sm text-neutral-500">Belum ada transaksi bulan ini.</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-neutral-800">
+              {recent.map((t) => {
+                const cat = t.category_id ? categoryMap.get(t.category_id) : undefined;
+                return (
+                  <li key={t.id} className="flex items-center gap-3 py-2.5">
+                    <div
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                      style={{ backgroundColor: (cat?.color ?? "#525252") + "33" }}
+                    >
+                      <CategoryIcon name={cat?.icon ?? "circle"} size={16} color={cat?.color ?? "#a3a3a3"} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm text-neutral-200">{cat?.name ?? "Tanpa kategori"}</p>
+                      <p className="truncate text-xs text-neutral-500">{t.note || formatDate(t.occurred_at)}</p>
+                    </div>
+                    <span className={`shrink-0 text-sm font-medium ${t.type === "income" ? "text-emerald-400" : "text-red-400"}`}>
+                      {t.type === "income" ? "+" : "-"}
+                      {rupiah.format(t.amount)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
+          <h2 className="mb-4 text-sm font-semibold text-neutral-300">Pengeluaran per Kategori</h2>
+          {breakdown.length === 0 ? (
+            <p className="text-sm text-neutral-500">Belum ada pengeluaran bulan ini.</p>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {breakdown.map(({ category, amount, pct }) => (
+                <li key={category?.id ?? "uncategorized"}>
+                  <div className="mb-1 flex items-center justify-between text-xs">
+                    <span className="text-neutral-300">{category?.name ?? "Tanpa kategori"}</span>
+                    <span className="text-neutral-500">{rupiah.format(amount)}</span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${pct}%`, backgroundColor: category?.color ?? "#6366f1" }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: number;
+  icon: typeof Wallet;
+  tone: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="text-sm text-neutral-400">{label}</span>
+        <Icon size={18} className={tone} />
+      </div>
+      <p className={`text-2xl font-semibold ${tone}`}>{rupiah.format(value)}</p>
     </div>
   );
 }
