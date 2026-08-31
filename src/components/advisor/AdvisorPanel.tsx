@@ -107,30 +107,35 @@ export function AdvisorPanel() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Tutup AI Advisor" : "Buka AI Advisor"}
-        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg transition hover:bg-indigo-500"
-      >
-        {open ? <X size={22} /> : <Sparkles size={22} />}
-      </button>
+      {!open && (
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Buka AI Advisor"
+          className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition active:scale-95 md:bottom-6 md:right-6"
+        >
+          <Sparkles size={22} />
+        </button>
+      )}
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-40 flex h-[32rem] w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-neutral-800 px-4 py-3">
+        <div
+          className="fixed inset-0 z-50 flex flex-col bg-white md:inset-auto md:bottom-24 md:right-6 md:h-[32rem] md:w-full md:max-w-sm md:overflow-hidden md:rounded-3xl md:border md:border-slate-200 md:shadow-2xl"
+          style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
+        >
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 md:pb-3 md:pt-3">
             <div>
-              <p className="text-sm font-semibold text-neutral-100">AI Advisor</p>
-              <p className="text-xs text-neutral-500">Catat lewat chat & tanya kondisi keuanganmu</p>
+              <p className="text-sm font-semibold text-slate-900">AI Advisor</p>
+              <p className="text-xs text-slate-500">Catat lewat chat & tanya kondisi keuanganmu</p>
             </div>
-            <button onClick={() => setOpen(false)} aria-label="Tutup" className="rounded-md p-1 text-neutral-400 hover:bg-neutral-800">
-              <X size={16} />
+            <button onClick={() => setOpen(false)} aria-label="Tutup" className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100">
+              <X size={18} />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto px-4 py-3">
             {messages.length === 0 ? (
-              <p className="text-sm text-neutral-500">
-                Tulis seperti <span className="text-neutral-300">&quot;beli mie ayam 25rb&quot;</span>, atau tanyakan kondisi keuanganmu.
+              <p className="text-sm text-slate-500">
+                Tulis seperti <span className="text-slate-700">&quot;beli mie ayam 25rb&quot;</span>, atau tanyakan kondisi keuanganmu.
               </p>
             ) : (
               <div className="flex flex-col gap-3">
@@ -139,10 +144,10 @@ export function AdvisorPanel() {
                     <div
                       className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
                         m.role === "user"
-                          ? "bg-indigo-600 text-white"
+                          ? "bg-blue-600 text-white"
                           : m.isError
-                            ? "bg-red-500/10 text-red-300"
-                            : "bg-neutral-800 text-neutral-200"
+                            ? "bg-red-50 text-red-600"
+                            : "bg-slate-100 text-slate-800"
                       }`}
                     >
                       <p>{m.text}</p>
@@ -158,34 +163,34 @@ export function AdvisorPanel() {
                           <button
                             disabled={pending}
                             onClick={() => cancelPreview(m.id)}
-                            className="flex items-center gap-1 rounded-lg border border-neutral-600 px-2.5 py-1 text-xs text-neutral-300 hover:bg-neutral-700 disabled:opacity-50"
+                            className="flex items-center gap-1 rounded-lg border border-slate-300 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-200 disabled:opacity-50"
                           >
                             <XCircle size={12} /> Batal
                           </button>
                         </div>
                       )}
-                      {m.preview && m.status === "confirmed" && <p className="mt-1.5 text-xs text-emerald-400">✓ Tersimpan</p>}
-                      {m.preview && m.status === "cancelled" && <p className="mt-1.5 text-xs text-neutral-500">Dibatalkan</p>}
-                      {m.preview && m.status === "error" && <p className="mt-1.5 text-xs text-red-400">Gagal menyimpan.</p>}
+                      {m.preview && m.status === "confirmed" && <p className="mt-1.5 text-xs text-emerald-600">✓ Tersimpan</p>}
+                      {m.preview && m.status === "cancelled" && <p className="mt-1.5 text-xs text-slate-400">Dibatalkan</p>}
+                      {m.preview && m.status === "error" && <p className="mt-1.5 text-xs text-red-600">Gagal menyimpan.</p>}
                     </div>
                   </div>
                 ))}
                 {pending && (
                   <div className="flex justify-start">
-                    <div className="rounded-2xl bg-neutral-800 px-3 py-2 text-sm text-neutral-400">...</div>
+                    <div className="rounded-2xl bg-slate-100 px-3 py-2 text-sm text-slate-400">...</div>
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          <div className="flex gap-1.5 border-t border-neutral-800 px-3 py-2">
+          <div className="flex gap-1.5 border-t border-slate-200 px-3 py-2">
             {QUICK_ACTIONS.map((q) => (
               <button
                 key={q.label}
                 onClick={() => send(q.prompt)}
                 disabled={pending}
-                className="whitespace-nowrap rounded-full border border-neutral-700 px-2.5 py-1 text-xs text-neutral-300 hover:bg-neutral-800 disabled:opacity-50"
+                className="whitespace-nowrap rounded-full border border-slate-200 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-100 disabled:opacity-50"
               >
                 {q.label}
               </button>
@@ -193,20 +198,20 @@ export function AdvisorPanel() {
           </div>
 
           {image && (
-            <div className="flex items-center justify-between border-t border-neutral-800 px-3 py-2 text-xs text-neutral-400">
+            <div className="flex items-center justify-between border-t border-slate-200 px-3 py-2 text-xs text-slate-500">
               <span>📎 {image.name}</span>
-              <button onClick={() => setImage(null)} aria-label="Hapus lampiran" className="text-neutral-500 hover:text-neutral-300">
+              <button onClick={() => setImage(null)} aria-label="Hapus lampiran" className="text-slate-400 hover:text-slate-600">
                 <X size={14} />
               </button>
             </div>
           )}
 
-          <div className="flex items-center gap-2 border-t border-neutral-800 p-3">
+          <div className="flex items-center gap-2 border-t border-slate-200 p-3">
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
             <button
               onClick={() => fileInputRef.current?.click()}
               aria-label="Lampirkan foto struk"
-              className="shrink-0 rounded-lg p-2 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-200"
+              className="shrink-0 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
             >
               <Paperclip size={18} />
             </button>
@@ -220,13 +225,13 @@ export function AdvisorPanel() {
                 }
               }}
               placeholder="Tulis transaksi atau pertanyaan..."
-              className="min-w-0 flex-1 rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+              className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none focus:border-blue-500"
             />
             <button
               onClick={() => send()}
               disabled={pending || (!input.trim() && !image)}
               aria-label="Kirim"
-              className="shrink-0 rounded-lg bg-indigo-600 p-2 text-white hover:bg-indigo-500 disabled:opacity-50"
+              className="shrink-0 rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-500 disabled:opacity-50"
             >
               <Send size={18} />
             </button>

@@ -11,8 +11,8 @@ export default async function SettingsPage() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-100">Pengaturan</h1>
-        <p className="text-sm text-neutral-500">Kelola API key AI Advisor.</p>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Pengaturan</h1>
+        <p className="text-sm text-slate-500">Kelola API key AI Advisor.</p>
       </div>
       <SettingsForm
         hasKey={!!settings?.gemini_api_key}

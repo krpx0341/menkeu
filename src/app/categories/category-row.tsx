@@ -21,19 +21,19 @@ export function CategoryRow({ category }: { category: Category }) {
           aria-label="Warna kategori"
           value={color}
           onChange={(e) => setColor(e.target.value)}
-          className="h-8 w-8 rounded border border-neutral-700 bg-neutral-800 p-0.5"
+          className="h-9 w-9 rounded-lg border border-slate-200 bg-slate-50 p-0.5"
         />
         <input
           aria-label="Nama kategori"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="min-w-0 flex-1 rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         />
         <input
           aria-label="Icon (lucide)"
           value={icon}
           onChange={(e) => setIcon(e.target.value)}
-          className="w-24 rounded-lg border border-neutral-700 bg-neutral-800 px-2 py-1 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="w-24 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         />
         <button
           disabled={pending}
@@ -42,11 +42,11 @@ export function CategoryRow({ category }: { category: Category }) {
             setEditing(false);
           })}
           aria-label="Simpan"
-          className="rounded-md p-1.5 text-emerald-400 hover:bg-neutral-800"
+          className="rounded-full p-2.5 text-emerald-600 hover:bg-emerald-50"
         >
           <Check size={16} />
         </button>
-        <button onClick={() => setEditing(false)} aria-label="Batal" className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-800">
+        <button onClick={() => setEditing(false)} aria-label="Batal" className="rounded-full p-2.5 text-slate-400 hover:bg-slate-100">
           <X size={16} />
         </button>
       </li>
@@ -57,23 +57,23 @@ export function CategoryRow({ category }: { category: Category }) {
     <li className={`flex items-center gap-3 py-2.5 ${category.is_archived ? "opacity-50" : ""}`}>
       <div
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-        style={{ backgroundColor: category.color + "33" }}
+        style={{ backgroundColor: category.color + "1f" }}
       >
         <CategoryIcon name={category.icon} size={16} color={category.color} />
       </div>
-      <span className="min-w-0 flex-1 truncate text-sm text-neutral-200">{category.name}</span>
-      {category.is_archived && <span className="text-xs text-neutral-500">Arsip</span>}
+      <span className="min-w-0 flex-1 truncate text-sm text-slate-900">{category.name}</span>
+      {category.is_archived && <span className="text-xs text-slate-400">Arsip</span>}
       <button
         onClick={() => setEditing(true)}
         aria-label="Edit kategori"
-        className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100"
+        className="rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
       >
         <Pencil size={15} />
       </button>
       <button
         disabled={pending}
         onClick={() => startTransition(() => setCategoryArchived(category.id, !category.is_archived))}
-        className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100"
+        className="rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
         title={category.is_archived ? "Aktifkan" : "Arsipkan"}
         aria-label={category.is_archived ? "Aktifkan kategori" : "Arsipkan kategori"}
       >

@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Nav } from "@/components/nav";
+import { AppHeader } from "@/components/AppHeader";
+import { TopNav } from "@/components/TopNav";
+import { BottomNav } from "@/components/BottomNav";
 import { AdvisorPanel } from "@/components/advisor/AdvisorPanel";
 
 const geistSans = Geist({
@@ -19,15 +21,26 @@ export const metadata: Metadata = {
   description: "Personal finance tracker",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f8fafc",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full bg-neutral-950 text-neutral-100">
-        <Nav />
-        <main className="min-w-0 flex-1 px-6 py-8 sm:px-10">{children}</main>
+      <body className="min-h-full bg-slate-50 text-slate-900">
+        <TopNav />
+        <AppHeader />
+        <main className="mx-auto max-w-6xl px-4 pb-28 pt-4 sm:px-6 md:px-8 md:pb-10 md:pt-8">
+          {children}
+        </main>
+        <BottomNav />
         <AdvisorPanel />
       </body>
     </html>

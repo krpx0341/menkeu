@@ -9,7 +9,7 @@ export default async function LoginPage({
   const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
 
   return (
-    <div className="flex min-h-full items-center justify-center bg-neutral-950 px-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-slate-50 px-4">
       <LoginForm next={safeNext} />
     </div>
   );

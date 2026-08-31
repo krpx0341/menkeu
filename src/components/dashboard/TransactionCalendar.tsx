@@ -53,10 +53,10 @@ export default function TransactionCalendar({
   const selectedItems = selectedDay !== null ? (byDay.get(selectedDay)?.items ?? []) : [];
 
   return (
-    <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-      <h2 className="mb-4 text-sm font-semibold text-neutral-300">Kalender Transaksi</h2>
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold text-slate-900">Kalender Transaksi</h2>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-neutral-500">
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-slate-400">
         {DAY_LABELS.map((d) => (
           <div key={d} className="py-1">
             {d}
@@ -79,38 +79,42 @@ export default function TransactionCalendar({
               onClick={() => setSelectedDay(isSelected ? null : day)}
               aria-label={hasTx ? `Lihat transaksi ${day} ${monthName}` : undefined}
               className={`flex min-h-16 flex-col items-start gap-0.5 rounded-lg border p-1.5 text-left text-[10px] leading-tight ${
-                hasTx ? "cursor-pointer border-neutral-800 hover:border-neutral-700" : "border-transparent"
-              } ${isSelected ? "border-indigo-600 bg-indigo-600/10" : "bg-neutral-950/40"}`}
+                hasTx ? "cursor-pointer border-slate-200 hover:border-slate-300" : "border-transparent"
+              } ${isSelected ? "border-blue-600 bg-blue-50" : "bg-slate-50"}`}
             >
-              <span className="text-neutral-400">{day}</span>
-              {entry && entry.income > 0 && <span className="text-emerald-400">+{compactRupiah(entry.income)}</span>}
-              {entry && entry.expense > 0 && <span className="text-red-400">-{compactRupiah(entry.expense)}</span>}
+              <span className="text-slate-500">{day}</span>
+              {entry && entry.income > 0 && <span className="text-emerald-600">+{compactRupiah(entry.income)}</span>}
+              {entry && entry.expense > 0 && <span className="text-red-600">-{compactRupiah(entry.expense)}</span>}
             </button>
           );
         })}
       </div>
 
       {selectedDay !== null && (
-        <div className="mt-4 border-t border-neutral-800 pt-4">
-          <h3 className="mb-2 text-xs font-semibold text-neutral-400">
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <h3 className="mb-2 text-xs font-semibold text-slate-500">
             Transaksi {selectedDay} {monthName}
           </h3>
-          <ul className="flex flex-col divide-y divide-neutral-800">
+          <ul className="flex flex-col divide-y divide-slate-100">
             {selectedItems.map((t) => {
               const cat = t.category_id ? categoryMap.get(t.category_id) : undefined;
               return (
                 <li key={t.id} className="flex items-center gap-3 py-2">
                   <div
                     className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-                    style={{ backgroundColor: (cat?.color ?? "#525252") + "33" }}
+                    style={{ backgroundColor: (cat?.color ?? "#94a3b8") + "1f" }}
                   >
-                    <CategoryIcon name={cat?.icon ?? "circle"} size={14} color={cat?.color ?? "#a3a3a3"} />
+                    <CategoryIcon name={cat?.icon ?? "circle"} size={14} color={cat?.color ?? "#64748b"} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-neutral-200">{cat?.name ?? "Tanpa kategori"}</p>
-                    {t.note && <p className="truncate text-xs text-neutral-500">{t.note}</p>}
+                    <p className="truncate text-sm text-slate-800">{cat?.name ?? "Tanpa kategori"}</p>
+                    {t.note && <p className="truncate text-xs text-slate-400">{t.note}</p>}
                   </div>
-                  <span className={`shrink-0 text-sm font-medium ${t.type === "income" ? "text-emerald-400" : "text-red-400"}`}>
+                  <span
+                    className={`shrink-0 text-sm font-medium tabular-nums ${
+                      t.type === "income" ? "text-emerald-600" : "text-red-600"
+                    }`}
+                  >
                     {t.type === "income" ? "+" : "-"}
                     {rupiah.format(t.amount)}
                   </span>
@@ -122,7 +126,7 @@ export default function TransactionCalendar({
       )}
 
       <div className="mt-4 text-right">
-        <Link href="/transactions" className="text-xs text-indigo-400 hover:text-indigo-300">
+        <Link href="/transactions" className="text-xs font-medium text-blue-600 hover:text-blue-700">
           Lihat semua
         </Link>
       </div>

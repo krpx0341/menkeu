@@ -2,7 +2,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import type { Budget, Category, Transaction } from "@/lib/types";
 import { rupiah, formatDate } from "@/lib/format";
 import { CategoryIcon } from "@/lib/icons";
-import { ArrowDownRight, ArrowUpRight, Wallet } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import MonthComparisonCard from "@/components/dashboard/MonthComparisonCard";
 import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
 import TransactionCalendar from "@/components/dashboard/TransactionCalendar";
@@ -92,19 +92,37 @@ export default async function DashboardPage() {
   const healthScore = budgetScore === null ? Math.round(cashFlowScore) : Math.round((cashFlowScore + budgetScore) / 2);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-100">Dashboard</h1>
-        <p className="text-sm text-neutral-500">Ringkasan {monthLabel}</p>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
+        <p className="text-sm text-slate-500">Ringkasan {monthLabel}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Pemasukan" value={totalIncome} icon={ArrowUpRight} tone="text-emerald-400" />
-        <StatCard label="Pengeluaran" value={totalExpense} icon={ArrowDownRight} tone="text-red-400" />
-        <StatCard label="Saldo Bersih" value={net} icon={Wallet} tone={net >= 0 ? "text-emerald-400" : "text-red-400"} />
+      {/* Hero balance card */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-blue-500 p-6 text-white shadow-lg shadow-blue-600/20">
+        <div className="pointer-events-none absolute -right-10 -top-16 h-48 w-48 rounded-full bg-white/10" />
+        <div className="pointer-events-none absolute -bottom-16 -left-8 h-40 w-40 rounded-full bg-white/10" />
+        <div className="relative">
+          <p className="text-sm text-blue-100">Saldo Bersih Bulan Ini</p>
+          <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight">{rupiah.format(net)}</p>
+          <div className="mt-6 flex gap-6 border-t border-white/20 pt-4">
+            <div className="flex-1">
+              <div className="mb-1 flex items-center gap-1.5 text-xs text-blue-100">
+                <ArrowUpRight size={14} /> Pemasukan
+              </div>
+              <p className="text-base font-semibold tabular-nums">{rupiah.format(totalIncome)}</p>
+            </div>
+            <div className="flex-1">
+              <div className="mb-1 flex items-center gap-1.5 text-xs text-blue-100">
+                <ArrowDownRight size={14} /> Pengeluaran
+              </div>
+              <p className="text-base font-semibold tabular-nums">{rupiah.format(totalExpense)}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <MonthComparisonCard
           thisMonth={{ income: totalIncome, expense: totalExpense }}
           lastMonth={{ income: prevTotalIncome, expense: prevTotalExpense }}
@@ -126,28 +144,32 @@ export default async function DashboardPage() {
         month={now.getMonth()}
       />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-          <h2 className="mb-4 text-sm font-semibold text-neutral-300">Transaksi Terbaru</h2>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-slate-900">Transaksi Terbaru</h2>
           {recent.length === 0 ? (
-            <p className="text-sm text-neutral-500">Belum ada transaksi bulan ini.</p>
+            <p className="text-sm text-slate-400">Belum ada transaksi bulan ini.</p>
           ) : (
-            <ul className="flex flex-col divide-y divide-neutral-800">
+            <ul className="flex flex-col divide-y divide-slate-100">
               {recent.map((t) => {
                 const cat = t.category_id ? categoryMap.get(t.category_id) : undefined;
                 return (
                   <li key={t.id} className="flex items-center gap-3 py-2.5">
                     <div
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
-                      style={{ backgroundColor: (cat?.color ?? "#525252") + "33" }}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                      style={{ backgroundColor: (cat?.color ?? "#94a3b8") + "1f" }}
                     >
-                      <CategoryIcon name={cat?.icon ?? "circle"} size={16} color={cat?.color ?? "#a3a3a3"} />
+                      <CategoryIcon name={cat?.icon ?? "circle"} size={16} color={cat?.color ?? "#64748b"} />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-neutral-200">{cat?.name ?? "Tanpa kategori"}</p>
-                      <p className="truncate text-xs text-neutral-500">{t.note || formatDate(t.occurred_at)}</p>
+                      <p className="truncate text-sm font-medium text-slate-900">{cat?.name ?? "Tanpa kategori"}</p>
+                      <p className="truncate text-xs text-slate-400">{t.note || formatDate(t.occurred_at)}</p>
                     </div>
-                    <span className={`shrink-0 text-sm font-medium ${t.type === "income" ? "text-emerald-400" : "text-red-400"}`}>
+                    <span
+                      className={`shrink-0 text-sm font-semibold tabular-nums ${
+                        t.type === "income" ? "text-emerald-600" : "text-red-600"
+                      }`}
+                    >
                       {t.type === "income" ? "+" : "-"}
                       {rupiah.format(t.amount)}
                     </span>
@@ -158,22 +180,22 @@ export default async function DashboardPage() {
           )}
         </section>
 
-        <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-          <h2 className="mb-4 text-sm font-semibold text-neutral-300">Pengeluaran per Kategori</h2>
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold text-slate-900">Pengeluaran per Kategori</h2>
           {breakdown.length === 0 ? (
-            <p className="text-sm text-neutral-500">Belum ada pengeluaran bulan ini.</p>
+            <p className="text-sm text-slate-400">Belum ada pengeluaran bulan ini.</p>
           ) : (
             <ul className="flex flex-col gap-3">
               {breakdown.map(({ category, amount, pct }) => (
                 <li key={category?.id ?? "uncategorized"}>
                   <div className="mb-1 flex items-center justify-between text-xs">
-                    <span className="text-neutral-300">{category?.name ?? "Tanpa kategori"}</span>
-                    <span className="text-neutral-500">{rupiah.format(amount)}</span>
+                    <span className="font-medium text-slate-700">{category?.name ?? "Tanpa kategori"}</span>
+                    <span className="tabular-nums text-slate-400">{rupiah.format(amount)}</span>
                   </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-neutral-800">
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${pct}%`, backgroundColor: category?.color ?? "#6366f1" }}
+                      style={{ width: `${pct}%`, backgroundColor: category?.color ?? "#2563eb" }}
                     />
                   </div>
                 </li>
@@ -182,28 +204,6 @@ export default async function DashboardPage() {
           )}
         </section>
       </div>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  tone,
-}: {
-  label: string;
-  value: number;
-  icon: typeof Wallet;
-  tone: string;
-}) {
-  return (
-    <div className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-sm text-neutral-400">{label}</span>
-        <Icon size={18} className={tone} />
-      </div>
-      <p className={`text-2xl font-semibold ${tone}`}>{rupiah.format(value)}</p>
     </div>
   );
 }

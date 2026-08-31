@@ -8,7 +8,9 @@ export function proxy(req: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/api/telegram") ||
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/icon") ||
+    pathname.startsWith("/apple-icon")
   ) {
     return NextResponse.next();
   }
@@ -25,5 +27,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api/telegram|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api/telegram|_next/static|_next/image|favicon.ico|icon.png|apple-icon.png).*)"],
 };

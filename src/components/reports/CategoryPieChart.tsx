@@ -10,7 +10,7 @@ function formatIDR(n: number): string {
 
 export default function CategoryPieChart({ data }: { data: CategorySlice[] }) {
   if (data.length === 0) {
-    return <p className="py-16 text-center text-sm text-neutral-500">Belum ada pengeluaran bulan ini.</p>;
+    return <p className="py-16 text-center text-sm text-slate-400">Belum ada pengeluaran bulan ini.</p>;
   }
 
   return (
@@ -18,15 +18,15 @@ export default function CategoryPieChart({ data }: { data: CategorySlice[] }) {
       <PieChart>
         <Pie data={data} dataKey="value" nameKey="name" innerRadius={60} outerRadius={100} paddingAngle={2}>
           {data.map((entry) => (
-            <Cell key={entry.name} fill={entry.color} stroke="#171717" />
+            <Cell key={entry.name} fill={entry.color} stroke="#ffffff" />
           ))}
         </Pie>
         <Tooltip
-          contentStyle={{ background: "#171717", border: "1px solid #404040", borderRadius: 8 }}
-          labelStyle={{ color: "#e5e5e5" }}
+          contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 8 }}
+          labelStyle={{ color: "#0f172a" }}
           formatter={(value) => formatIDR(Number(value))}
         />
-        <Legend wrapperStyle={{ fontSize: 12, color: "#a3a3a3" }} />
+        <Legend wrapperStyle={{ fontSize: 12, color: "#64748b" }} />
       </PieChart>
     </ResponsiveContainer>
   );

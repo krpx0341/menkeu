@@ -38,7 +38,7 @@ export function TransactionForm({
     <form action={formAction} className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">Jumlah</label>
+          <label className="mb-1 block text-xs font-medium text-slate-500">Jumlah</label>
           <input
             name="amount"
             type="number"
@@ -46,16 +46,16 @@ export function TransactionForm({
             step="1"
             required
             defaultValue={transaction?.amount}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">Tipe</label>
+          <label className="mb-1 block text-xs font-medium text-slate-500">Tipe</label>
           <select
             name="type"
             value={type}
             onChange={(e) => setType(e.target.value as TxType)}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
           >
             <option value="expense">Pengeluaran</option>
             <option value="income">Pemasukan</option>
@@ -64,11 +64,11 @@ export function TransactionForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">Kategori</label>
+        <label className="mb-1 block text-xs font-medium text-slate-500">Kategori</label>
         <select
           name="category_id"
           defaultValue={categoryStillValid ? transaction?.category_id ?? "" : ""}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         >
           <option value="">Tanpa kategori</option>
           {availableCategories.map((c) => (
@@ -80,39 +80,39 @@ export function TransactionForm({
       </div>
 
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">Catatan</label>
+        <label className="mb-1 block text-xs font-medium text-slate-500">Catatan</label>
         <input
           name="note"
           defaultValue={transaction?.note ?? ""}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">Tanggal</label>
+        <label className="mb-1 block text-xs font-medium text-slate-500">Tanggal</label>
         <input
           name="occurred_at"
           type="date"
           required
           defaultValue={transaction ? transaction.occurred_at.slice(0, 10) : todayISODate()}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         />
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="mt-2 flex justify-end gap-2">
         <button
           type="button"
           onClick={onDone}
-          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
         >
           Batal
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-500 active:scale-[0.99] disabled:opacity-50"
         >
           {pending ? "Menyimpan..." : "Simpan"}
         </button>

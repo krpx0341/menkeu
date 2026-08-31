@@ -16,8 +16,8 @@ export default async function CategoriesPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-100">Kategori</h1>
-        <p className="text-sm text-neutral-500">Kelola kategori pemasukan dan pengeluaran.</p>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Kategori</h1>
+        <p className="text-sm text-slate-500">Kelola kategori pemasukan dan pengeluaran.</p>
       </div>
 
       <AddCategoryForm />
@@ -32,12 +32,12 @@ export default async function CategoriesPage() {
 
 function CategoryGroup({ title, categories }: { title: string; categories: Category[] }) {
   return (
-    <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-      <h2 className="mb-4 text-sm font-semibold text-neutral-300">{title}</h2>
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 className="mb-4 text-sm font-semibold text-slate-900">{title}</h2>
       {categories.length === 0 ? (
-        <p className="text-sm text-neutral-500">Belum ada kategori.</p>
+        <p className="text-sm text-slate-400">Belum ada kategori.</p>
       ) : (
-        <ul className="flex flex-col divide-y divide-neutral-800">
+        <ul className="flex flex-col divide-y divide-slate-100">
           {categories.map((c) => (
             <CategoryRow key={c.id} category={c} />
           ))}

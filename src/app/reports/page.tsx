@@ -92,33 +92,33 @@ export default async function ReportsPage({
   const nextMonth = shiftMonth(month, 1);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-neutral-100">Laporan</h1>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Laporan</h1>
         <div className="flex items-center gap-2">
           <Link
             href={`/reports?month=${prevMonth}`}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-700"
+            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 active:bg-slate-100"
           >
             &larr;
           </Link>
-          <span className="min-w-[9rem] text-center text-sm text-neutral-300">{monthLabel(monthKey)}</span>
+          <span className="min-w-[9rem] text-center text-sm text-slate-700">{monthLabel(monthKey)}</span>
           <Link
             href={`/reports?month=${nextMonth}`}
-            className="rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm text-neutral-200 hover:bg-neutral-700"
+            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 active:bg-slate-100"
           >
             &rarr;
           </Link>
         </div>
       </div>
 
-      <section className="mb-6 rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-        <h2 className="mb-4 text-sm font-medium text-neutral-300">Pemasukan vs Pengeluaran (6 Bulan)</h2>
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-4 text-sm font-semibold text-slate-900">Pemasukan vs Pengeluaran (6 Bulan)</h2>
         <IncomeExpenseBarChart data={buckets} />
       </section>
 
-      <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
-        <h2 className="mb-4 text-sm font-medium text-neutral-300">
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-4 text-sm font-semibold text-slate-900">
           Rincian Pengeluaran — {monthLabel(monthKey)}
         </h2>
         <CategoryPieChart data={pieData} />

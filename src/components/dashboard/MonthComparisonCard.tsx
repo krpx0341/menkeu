@@ -46,17 +46,17 @@ export default function MonthComparisonCard({
   }
 
   return (
-    <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-300">Perbandingan Bulanan</h2>
-        <div className="flex gap-1 rounded-lg bg-neutral-800 p-1">
+        <h2 className="text-sm font-semibold text-slate-900">Perbandingan Bulanan</h2>
+        <div className="flex gap-1 rounded-lg bg-slate-100 p-1">
           {(["income", "expense"] as Tab[]).map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setTab(t)}
               className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                tab === t ? "bg-white text-neutral-900" : "text-neutral-400 hover:text-neutral-200"
+                tab === t ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
               }`}
             >
               {t === "income" ? "Pemasukan" : "Pengeluaran"}
@@ -65,18 +65,18 @@ export default function MonthComparisonCard({
         </div>
       </div>
 
-      <div className="mb-2 flex items-start justify-between text-xs text-neutral-500">
+      <div className="mb-2 flex items-start justify-between text-xs text-slate-400">
         <span>{thisMonthLabel}</span>
         <span>{lastMonthLabel}</span>
       </div>
 
       <div className="mb-3 flex items-end justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-semibold text-neutral-100">{rupiah.format(thisVal)}</span>
+          <span className="text-2xl font-semibold tabular-nums tracking-tight text-slate-900">{rupiah.format(thisVal)}</span>
           {change !== null && (
             <span
               className={`flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
-                isImprovement ? "bg-emerald-400/10 text-emerald-400" : "bg-red-400/10 text-red-400"
+                isImprovement ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
               }`}
             >
               {isImprovement ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
@@ -84,22 +84,22 @@ export default function MonthComparisonCard({
             </span>
           )}
         </div>
-        <span className="text-sm text-neutral-500">{rupiah.format(lastVal)}</span>
+        <span className="text-sm tabular-nums text-slate-400">{rupiah.format(lastVal)}</span>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <div className="h-2.5 w-full overflow-hidden rounded-full bg-neutral-800">
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
           <div
             className={`h-full rounded-full ${tab === "income" ? "bg-emerald-500" : "bg-red-500"}`}
             style={{ width: `${thisBarPct}%` }}
           />
         </div>
-        <div className="h-2.5 w-full overflow-hidden rounded-full bg-neutral-800">
-          <div className="h-full rounded-full bg-neutral-600" style={{ width: `${lastBarPct}%` }} />
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full rounded-full bg-slate-300" style={{ width: `${lastBarPct}%` }} />
         </div>
       </div>
 
-      <p className="mt-3 text-xs text-neutral-500">{sentence}</p>
+      <p className="mt-3 text-xs text-slate-500">{sentence}</p>
     </section>
   );
 }

@@ -4,7 +4,12 @@ import { TransactionList } from "./transaction-list";
 
 export const dynamic = "force-dynamic";
 
-export default async function TransactionsPage() {
+export default async function TransactionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ new?: string }>;
+}) {
+  const { new: autoOpenNew } = await searchParams;
   const db = supabaseAdmin();
   const [{ data: txs }, { data: cats }] = await Promise.all([
     db.from("transactions").select("*").order("occurred_at", { ascending: false }).limit(100),
@@ -17,16 +22,15 @@ export default async function TransactionsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-neutral-100">Transaksi</h1>
-          <p className="text-sm text-neutral-500">100 transaksi terbaru.</p>
-        </div>
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Transaksi</h1>
+        <p className="text-sm text-slate-500">100 transaksi terbaru.</p>
       </div>
       <TransactionList
         transactions={transactions}
         categories={(cats ?? []) as Category[]}
         receiptUrlByPath={receiptUrlByPath}
+        autoOpenAdd={autoOpenNew === "1"}
       />
     </div>
   );

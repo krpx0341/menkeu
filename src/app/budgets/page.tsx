@@ -46,15 +46,17 @@ export default async function BudgetsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-1 text-xl font-semibold text-neutral-100">Budget Bulan Ini</h1>
-      <p className="mb-6 text-sm text-neutral-400">
-        {new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(monthStart)}
-      </p>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Budget Bulan Ini</h1>
+        <p className="text-sm text-slate-500">
+          {new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(monthStart)}
+        </p>
+      </div>
 
       <BudgetForm categories={cats} month={month} />
 
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         {cats.map((cat) => {
           const budget = budgetByCategory.get(cat.id);
           const spent = spentByCategory.get(cat.id) ?? 0;
@@ -63,20 +65,20 @@ export default async function BudgetsPage() {
           const over90 = limit > 0 && spent / limit >= 0.9;
 
           return (
-            <div key={cat.id} className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">
+            <div key={cat.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <div className="mb-2 flex items-center justify-between">
-                <span className="flex items-center gap-2 text-sm font-medium text-neutral-100">
+                <span className="flex items-center gap-2 text-sm font-medium text-slate-900">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
                   {cat.name}
                 </span>
-                <span className="text-sm text-neutral-400">
+                <span className="text-sm tabular-nums text-slate-500">
                   {formatIDR(spent)} {limit > 0 ? `/ ${formatIDR(limit)}` : "(belum ada budget)"}
                 </span>
               </div>
               {limit > 0 && (
-                <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-800">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className={`h-full rounded-full transition-all ${over90 ? "bg-red-500" : "bg-indigo-600"}`}
+                    className={`h-full rounded-full transition-all ${over90 ? "bg-red-500" : "bg-blue-600"}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -85,7 +87,7 @@ export default async function BudgetsPage() {
           );
         })}
         {cats.length === 0 && (
-          <p className="text-sm text-neutral-500">Belum ada kategori pengeluaran.</p>
+          <p className="text-sm text-slate-400">Belum ada kategori pengeluaran.</p>
         )}
       </div>
     </div>

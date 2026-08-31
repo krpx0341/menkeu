@@ -19,18 +19,18 @@ export function GoalForm({ goal, onDone }: { goal?: Goal; onDone: () => void }) 
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">Nama</label>
+        <label className="mb-1 block text-xs text-slate-500">Nama</label>
         <input
           name="name"
           required
           defaultValue={goal?.name}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">Target (Rp)</label>
+          <label className="mb-1 block text-xs text-slate-500">Target (Rp)</label>
           <input
             name="target_amount"
             type="number"
@@ -38,15 +38,15 @@ export function GoalForm({ goal, onDone }: { goal?: Goal; onDone: () => void }) 
             step="1"
             required
             defaultValue={goal?.target_amount}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-neutral-400">Prioritas</label>
+          <label className="mb-1 block text-xs text-slate-500">Prioritas</label>
           <select
             name="priority"
             defaultValue={goal?.priority ?? "medium"}
-            className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
           >
             <option value="low">Rendah</option>
             <option value="medium">Sedang</option>
@@ -56,39 +56,39 @@ export function GoalForm({ goal, onDone }: { goal?: Goal; onDone: () => void }) 
       </div>
 
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">Tenggat (opsional)</label>
+        <label className="mb-1 block text-xs text-slate-500">Tenggat (opsional)</label>
         <input
           name="deadline"
           type="date"
           defaultValue={goal?.deadline ? goal.deadline.slice(0, 10) : ""}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         />
       </div>
 
       <div>
-        <label className="mb-1 block text-xs text-neutral-400">Gambar URL</label>
+        <label className="mb-1 block text-xs text-slate-500">Gambar URL</label>
         <input
           name="image_url"
           placeholder="https://... (opsional)"
           defaultValue={goal?.image_url ?? ""}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         />
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="mt-2 flex justify-end gap-2">
         <button
           type="button"
           onClick={onDone}
-          className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
+          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
         >
           Batal
         </button>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-500 active:scale-[0.99] disabled:opacity-50"
         >
           {pending ? "Menyimpan..." : "Simpan"}
         </button>

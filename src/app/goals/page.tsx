@@ -20,8 +20,8 @@ export default async function GoalsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold text-neutral-100">Target</h1>
-        <p className="text-sm text-neutral-500">Rencana dan progres menabung untuk tujuanmu.</p>
+        <h1 className="text-xl font-semibold tracking-tight text-slate-900">Target</h1>
+        <p className="text-sm text-slate-500">Rencana dan progres menabung untuk tujuanmu.</p>
       </div>
       <GoalList goals={goals} />
     </div>
