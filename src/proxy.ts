@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const COOKIE = "menkeu_session";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   if (
     pathname.startsWith("/login") ||
@@ -13,8 +13,9 @@ export function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const sessionSecret = process.env.SESSION_SECRET;
   const cookie = req.cookies.get(COOKIE)?.value;
-  if (cookie !== process.env.SESSION_SECRET) {
+  if (!sessionSecret || cookie !== sessionSecret) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);

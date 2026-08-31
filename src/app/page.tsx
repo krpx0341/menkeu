@@ -1,23 +1,38 @@
 import { supabaseAdmin } from "@/lib/supabase/server";
-import type { Category, Transaction } from "@/lib/types";
+import type { Budget, Category, Transaction } from "@/lib/types";
 import { rupiah, formatDate } from "@/lib/format";
 import { CategoryIcon } from "@/lib/icons";
 import { ArrowDownRight, ArrowUpRight, Wallet } from "lucide-react";
+import MonthComparisonCard from "@/components/dashboard/MonthComparisonCard";
+import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
+import TransactionCalendar from "@/components/dashboard/TransactionCalendar";
 
 export const dynamic = "force-dynamic";
+
+function clamp(n: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, n));
+}
 
 export default async function DashboardPage() {
   const db = supabaseAdmin();
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
+  const monthValue = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
 
-  const [{ data: txs }, { data: categories }] = await Promise.all([
+  const [{ data: txs }, { data: categories }, { data: prevTxs }, { data: budgetRows }] = await Promise.all([
     db
       .from("transactions")
       .select("*")
       .gte("occurred_at", monthStart)
       .order("occurred_at", { ascending: false }),
     db.from("categories").select("*"),
+    db
+      .from("transactions")
+      .select("*")
+      .gte("occurred_at", prevMonthStart)
+      .lt("occurred_at", monthStart),
+    db.from("budgets").select("*").eq("month", monthValue),
   ]);
 
   const transactions = (txs ?? []) as Transaction[];
@@ -26,6 +41,10 @@ export default async function DashboardPage() {
   const totalIncome = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalExpense = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const net = totalIncome - totalExpense;
+
+  const prevTransactions = (prevTxs ?? []) as Transaction[];
+  const prevTotalIncome = prevTransactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
+  const prevTotalExpense = prevTransactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
 
   const recent = transactions.slice(0, 10);
 
@@ -44,6 +63,33 @@ export default async function DashboardPage() {
     }));
 
   const monthLabel = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(now);
+  const prevMonthLabel = new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(
+    new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  );
+
+  // Financial health score: average of cash-flow health and budget-utilization
+  // health (the latter only if budgets exist this month).
+  const cashFlowScore =
+    totalIncome > 0
+      ? clamp(((totalIncome - totalExpense) / totalIncome) * 100, 0, 100)
+      : totalExpense > 0
+        ? 0
+        : 100;
+
+  const budgets = (budgetRows ?? []) as Budget[];
+  let budgetScore: number | null = null;
+  let budgetUtilizationPct: number | null = null;
+  if (budgets.length > 0) {
+    const utilizationPcts = budgets.map((b) => {
+      const spent = byCategory.get(b.category_id) ?? 0;
+      return b.amount_limit > 0 ? Math.min(spent / b.amount_limit, 1.5) * 100 : spent > 0 ? 150 : 0;
+    });
+    const categoryScores = utilizationPcts.map((u) => (u <= 80 ? 100 : clamp(100 - (u - 80) * 2, 0, 100)));
+    budgetScore = categoryScores.reduce((s, x) => s + x, 0) / categoryScores.length;
+    budgetUtilizationPct = utilizationPcts.reduce((s, x) => s + x, 0) / utilizationPcts.length;
+  }
+
+  const healthScore = budgetScore === null ? Math.round(cashFlowScore) : Math.round((cashFlowScore + budgetScore) / 2);
 
   return (
     <div className="flex flex-col gap-8">
@@ -57,6 +103,28 @@ export default async function DashboardPage() {
         <StatCard label="Pengeluaran" value={totalExpense} icon={ArrowDownRight} tone="text-red-400" />
         <StatCard label="Saldo Bersih" value={net} icon={Wallet} tone={net >= 0 ? "text-emerald-400" : "text-red-400"} />
       </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <MonthComparisonCard
+          thisMonth={{ income: totalIncome, expense: totalExpense }}
+          lastMonth={{ income: prevTotalIncome, expense: prevTotalExpense }}
+          thisMonthLabel={monthLabel}
+          lastMonthLabel={prevMonthLabel}
+        />
+        <HealthScoreCard
+          score={healthScore}
+          cashFlowScore={cashFlowScore}
+          budgetScore={budgetScore}
+          budgetUtilizationPct={budgetUtilizationPct}
+        />
+      </div>
+
+      <TransactionCalendar
+        transactions={transactions}
+        categories={(categories as Category[] | null) ?? []}
+        year={now.getFullYear()}
+        month={now.getMonth()}
+      />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-neutral-800 bg-neutral-900 p-5">

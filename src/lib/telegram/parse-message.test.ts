@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMessage } from "./parse-message";
+import { parseAmount, parseMessage } from "./parse-message";
 import type { Category } from "@/lib/types";
 
 const categories: Category[] = [
@@ -32,5 +32,15 @@ describe("parseMessage", () => {
   it("handles plain numbers and k/jt suffixes", () => {
     expect(parseMessage("200k dari freelance", categories).amount).toBe(200_000);
     expect(parseMessage("50000 makan di warteg", categories).amount).toBe(50000);
+  });
+});
+
+describe("parseAmount", () => {
+  it("parses a bare reply like '25rb' used to correct a receipt placeholder", () => {
+    expect(parseAmount("25rb").amount).toBe(25_000);
+  });
+
+  it("returns null for text with no digits", () => {
+    expect(parseAmount("gak ada angka").amount).toBeNull();
   });
 });

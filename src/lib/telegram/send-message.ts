@@ -1,5 +1,6 @@
 // Minimal wrapper around Telegram's sendMessage Bot API call.
-export async function sendTelegramMessage(chatId: number | string, text: string): Promise<void> {
+// Returns the sent message's id so callers can later match a reply back to it.
+export async function sendTelegramMessage(chatId: number | string, text: string): Promise<number> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) throw new Error("Missing TELEGRAM_BOT_TOKEN env var");
 
@@ -12,4 +13,6 @@ export async function sendTelegramMessage(chatId: number | string, text: string)
     const body = await res.text().catch(() => "");
     throw new Error(`Telegram sendMessage failed: ${res.status} ${body}`);
   }
+  const json = await res.json();
+  return json.result.message_id as number;
 }

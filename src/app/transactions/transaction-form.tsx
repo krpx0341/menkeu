@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import type { Category, Transaction, TxType } from "@/lib/types";
 import { createTransaction, updateTransaction } from "./actions";
 
@@ -29,6 +29,10 @@ export function TransactionForm({
   }, [pending, error]);
 
   const defaultType: TxType = transaction?.type ?? "expense";
+  const [type, setType] = useState<TxType>(defaultType);
+  const availableCategories = categories.filter((c) => !c.is_archived && c.type === type);
+  const categoryStillValid =
+    transaction?.category_id && availableCategories.some((c) => c.id === transaction.category_id);
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
@@ -49,7 +53,8 @@ export function TransactionForm({
           <label className="mb-1 block text-xs text-neutral-400">Tipe</label>
           <select
             name="type"
-            defaultValue={defaultType}
+            value={type}
+            onChange={(e) => setType(e.target.value as TxType)}
             className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
           >
             <option value="expense">Pengeluaran</option>
@@ -62,17 +67,15 @@ export function TransactionForm({
         <label className="mb-1 block text-xs text-neutral-400">Kategori</label>
         <select
           name="category_id"
-          defaultValue={transaction?.category_id ?? ""}
+          defaultValue={categoryStillValid ? transaction?.category_id ?? "" : ""}
           className="w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-neutral-100 outline-none focus:border-indigo-500"
         >
           <option value="">Tanpa kategori</option>
-          {categories
-            .filter((c) => !c.is_archived)
-            .map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({c.type === "income" ? "Pemasukan" : "Pengeluaran"})
-              </option>
-            ))}
+          {availableCategories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
         </select>
       </div>
 

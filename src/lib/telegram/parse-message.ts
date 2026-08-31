@@ -14,7 +14,7 @@ const INCOME_KEYWORDS = ["gaji", "terima", "masuk", "dapat", "income", "bonus", 
 const AMOUNT_RE = /(\d[\d.,]*)\s*(ribu|rb|jt|juta|k)?/i;
 const MULTIPLIERS: Record<string, number> = { rb: 1000, ribu: 1000, k: 1000, jt: 1_000_000, juta: 1_000_000 };
 
-function parseAmount(text: string): { amount: number | null; matchedText: string } {
+export function parseAmount(text: string): { amount: number | null; matchedText: string } {
   const match = text.match(AMOUNT_RE);
   if (!match) return { amount: null, matchedText: "" };
   const numRaw = match[1].replace(/\./g, "").replace(/,/g, "");

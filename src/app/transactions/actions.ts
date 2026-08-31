@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import type { TxType } from "@/lib/types";
 
-function parseForm(formData: FormData) {
+async function parseForm(formData: FormData) {
   const amount = Number(formData.get("amount"));
   const type = String(formData.get("type") ?? "") as TxType;
   const category_id = String(formData.get("category_id") ?? "") || null;
@@ -15,6 +15,16 @@ function parseForm(formData: FormData) {
   if (type !== "income" && type !== "expense") throw new Error("Tipe tidak valid.");
   if (!occurred_at_raw) throw new Error("Tanggal wajib diisi.");
 
+  if (category_id) {
+    const { data: category, error } = await supabaseAdmin()
+      .from("categories")
+      .select("type")
+      .eq("id", category_id)
+      .single();
+    if (error || !category) throw new Error("Kategori tidak ditemukan.");
+    if (category.type !== type) throw new Error("Kategori tidak cocok dengan tipe transaksi.");
+  }
+
   const occurred_at = new Date(occurred_at_raw).toISOString();
 
   return { amount, type, category_id, note, occurred_at };
@@ -22,7 +32,7 @@ function parseForm(formData: FormData) {
 
 export async function createTransaction(_prev: string | undefined, formData: FormData) {
   try {
-    const values = parseForm(formData);
+    const values = await parseForm(formData);
     const { error } = await supabaseAdmin().from("transactions").insert({ ...values, source: "web" });
     if (error) return error.message;
   } catch (e) {
@@ -35,7 +45,7 @@ export async function createTransaction(_prev: string | undefined, formData: For
 
 export async function updateTransaction(id: string, _prev: string | undefined, formData: FormData) {
   try {
-    const values = parseForm(formData);
+    const values = await parseForm(formData);
     const { error } = await supabaseAdmin().from("transactions").update(values).eq("id", id);
     if (error) return error.message;
   } catch (e) {

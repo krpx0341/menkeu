@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabase/server";
+import { getReceiptSignedUrls, supabaseAdmin } from "@/lib/supabase/server";
 import type { Category, Transaction } from "@/lib/types";
 import { TransactionList } from "./transaction-list";
 
@@ -11,6 +11,10 @@ export default async function TransactionsPage() {
     db.from("categories").select("*").order("name"),
   ]);
 
+  const transactions = (txs ?? []) as Transaction[];
+  const receiptPaths = transactions.map((t) => t.receipt_path).filter((p): p is string => !!p);
+  const receiptUrlByPath = await getReceiptSignedUrls(receiptPaths);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -20,8 +24,9 @@ export default async function TransactionsPage() {
         </div>
       </div>
       <TransactionList
-        transactions={(txs ?? []) as Transaction[]}
+        transactions={transactions}
         categories={(cats ?? []) as Category[]}
+        receiptUrlByPath={receiptUrlByPath}
       />
     </div>
   );

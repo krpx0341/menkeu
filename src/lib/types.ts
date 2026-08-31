@@ -18,7 +18,8 @@ export type Transaction = {
   occurred_at: string;
   source: "web" | "telegram";
   telegram_message_id: number | null;
-  receipt_url: string | null;
+  telegram_confirm_message_id: number | null;
+  receipt_path: string | null;
   raw_input: string | null;
   created_at: string;
 };
@@ -29,3 +30,35 @@ export type Budget = {
   month: string; // YYYY-MM-01
   amount_limit: number;
 };
+
+export type Goal = {
+  id: string;
+  name: string;
+  target_amount: number;
+  current_amount: number;
+  image_url: string | null;
+  priority: "low" | "medium" | "high";
+  deadline: string | null;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AppSettings = {
+  gemini_api_key: string | null;
+  gemini_model: string;
+  updated_at: string;
+};
+
+export type AdvisorResult =
+  | {
+      type: "transaction_preview";
+      amount: number;
+      txType: TxType;
+      categoryId: string | null;
+      categoryName: string;
+      note: string;
+      occurredAt: string | null; // ISO date, null = default to now on confirm
+    }
+  | { type: "answer"; text: string }
+  | { type: "error"; message: string };
