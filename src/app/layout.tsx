@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { TopNav } from "@/components/TopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { AdvisorPanel } from "@/components/advisor/AdvisorPanel";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,13 +20,18 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Menkeu",
   description: "Personal finance tracker",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Menkeu",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f8fafc",
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -42,6 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </main>
         <BottomNav />
         <AdvisorPanel />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

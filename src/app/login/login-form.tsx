@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState } from "react";
-import { Wallet } from "lucide-react";
 import { login } from "./actions";
 
 export function LoginForm({ next }: { next: string }) {
@@ -13,9 +12,8 @@ export function LoginForm({ next }: { next: string }) {
       className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
     >
       <div className="mb-6 flex flex-col items-center text-center">
-        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
-          <Wallet size={22} />
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element -- local SVG, next/image's optimizer blocks SVGs by default */}
+        <img src="/brand/logo-mark.svg" alt="" width={48} height={48} className="mb-3 h-12 w-12 rounded-2xl" />
         <h1 className="text-xl font-semibold tracking-tight text-slate-900">Menkeu</h1>
         <p className="mt-1 text-sm text-slate-500">Masuk untuk lihat keuangan kamu.</p>
       </div>

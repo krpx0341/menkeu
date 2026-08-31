@@ -6,6 +6,24 @@ Stack: Next.js 16 (App Router, Server Actions), React 19, Tailwind CSS v4, Supab
 
 Single-user app: there's no account system, just one shared password gate (`APP_PASSWORD`) via `src/proxy.ts`.
 
+Installable as a PWA (manifest at `src/app/manifest.ts`, service worker at `public/sw.js`) — "Add to Home Screen" on iOS/Android gives it a standalone, full-screen app icon. The service worker only caches this app's own static assets (`/icons/`, `/brand/`); it never caches pages or API responses, so it can't show a stale cached balance while offline.
+
+## Brand
+
+App icon source lives at `public/brand/logo-mark.svg` (regular, rounded corners) and `public/brand/logo-mark-maskable.svg` (full-bleed, for Android adaptive icons — the OS applies its own mask). All shipped icon sizes (`favicon.ico`, `src/app/icon.png`, `src/app/apple-icon.png`, `public/icons/*.png`) are rendered from these two SVGs; edit the SVGs and re-render rather than editing a PNG directly:
+
+```bash
+rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o src/app/icon.png
+rsvg-convert -w 180 -h 180 public/brand/logo-mark-maskable.svg -o src/app/apple-icon.png
+magick public/brand/logo-mark.svg -define icon:auto-resize=16,32,48,64 src/app/favicon.ico
+rsvg-convert -w 192 -h 192 public/brand/logo-mark.svg -o public/icons/icon-192.png
+rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o public/icons/icon-512.png
+rsvg-convert -w 192 -h 192 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-192.png
+rsvg-convert -w 512 -h 512 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-512.png
+```
+
+Brand color: blue-600 (`#2563eb`), matching the app's UI accent.
+
 ## Setup
 
 1. **Install dependencies**
