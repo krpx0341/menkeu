@@ -1,12 +1,41 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Plus, Pencil, Trash2, X, Image as ImageIcon } from "lucide-react";
-import type { Category, Transaction } from "@/lib/types";
+import { useMemo, useState, useTransition } from "react";
+import { Plus, Pencil, Trash2, X, Image as ImageIcon, Search } from "lucide-react";
+import { startOfDay, startOfWeek, startOfMonth, isToday, isYesterday, format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+import type { Category, Transaction, TxType } from "@/lib/types";
 import { rupiah, formatDate } from "@/lib/format";
 import { CategoryIcon } from "@/lib/icons";
 import { deleteTransaction } from "./actions";
 import { TransactionForm } from "./transaction-form";
+
+type TypeFilter = "all" | TxType;
+type RangeFilter = "month" | "week" | "today";
+
+const TYPE_FILTERS: { value: TypeFilter; label: string }[] = [
+  { value: "all", label: "Semua" },
+  { value: "income", label: "Pemasukan" },
+  { value: "expense", label: "Pengeluaran" },
+];
+
+const RANGE_FILTERS: { value: RangeFilter; label: string }[] = [
+  { value: "month", label: "Bulan ini" },
+  { value: "week", label: "Minggu ini" },
+  { value: "today", label: "Hari ini" },
+];
+
+function rangeStart(range: RangeFilter, now: Date): Date {
+  if (range === "today") return startOfDay(now);
+  if (range === "week") return startOfWeek(now, { weekStartsOn: 1 });
+  return startOfMonth(now);
+}
+
+function dayLabel(date: Date): string {
+  if (isToday(date)) return "Hari ini";
+  if (isYesterday(date)) return "Kemarin";
+  return format(date, "d MMMM yyyy", { locale: idLocale });
+}
 
 export function TransactionList({
   transactions,
@@ -22,7 +51,37 @@ export function TransactionList({
   const [modal, setModal] = useState<"add" | Transaction | null>(autoOpenAdd ? "add" : null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const categoryMap = new Map(categories.map((c) => [c.id, c]));
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [rangeFilter, setRangeFilter] = useState<RangeFilter>("month");
+  const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const since = rangeStart(rangeFilter, new Date());
+    return transactions.filter((t) => {
+      if (new Date(t.occurred_at) < since) return false;
+      if (typeFilter !== "all" && t.type !== typeFilter) return false;
+      if (query) {
+        const cat = t.category_id ? categoryMap.get(t.category_id) : undefined;
+        const haystack = `${cat?.name ?? ""} ${t.note ?? ""}`.toLowerCase();
+        if (!haystack.includes(query)) return false;
+      }
+      return true;
+    });
+  }, [transactions, search, typeFilter, rangeFilter, categoryMap]);
+
+  const groups = useMemo(() => {
+    const map = new Map<string, { date: Date; items: Transaction[] }>();
+    for (const t of filtered) {
+      const date = startOfDay(new Date(t.occurred_at));
+      const key = date.toISOString();
+      const entry = map.get(key) ?? { date, items: [] };
+      entry.items.push(t);
+      map.set(key, entry);
+    }
+    return [...map.values()].sort((a, b) => b.date.getTime() - a.date.getTime());
+  }, [filtered]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -33,66 +92,115 @@ export function TransactionList({
         <Plus size={16} /> Tambah Transaksi
       </button>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {transactions.length === 0 ? (
-          <p className="p-6 text-sm text-slate-400">Belum ada transaksi.</p>
+      <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="relative">
+          <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari transaksi"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {TYPE_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setTypeFilter(f.value)}
+              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                typeFilter === f.value ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1 rounded-xl bg-slate-100 p-1">
+          {RANGE_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setRangeFilter(f.value)}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-medium transition ${
+                rangeFilter === f.value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-5">
+        {groups.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm text-slate-400">
+              {transactions.length === 0 ? "Belum ada transaksi." : "Tidak ada transaksi yang cocok."}
+            </p>
+          </div>
         ) : (
-          <ul className="flex flex-col divide-y divide-slate-100">
-            {transactions.map((t) => {
-              const cat = t.category_id ? categoryMap.get(t.category_id) : undefined;
-              return (
-                <li key={t.id} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 active:bg-slate-100">
-                  <div
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-                    style={{ backgroundColor: (cat?.color ?? "#94a3b8") + "1f" }}
-                  >
-                    <CategoryIcon name={cat?.icon ?? "circle"} size={16} color={cat?.color ?? "#64748b"} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-slate-900">{cat?.name ?? "Tanpa kategori"}</p>
-                    <p className="truncate text-xs text-slate-400">
-                      {formatDate(t.occurred_at)}
-                      {t.note ? ` · ${t.note}` : ""}
-                    </p>
-                  </div>
-                  <span
-                    className={`shrink-0 text-sm font-semibold tabular-nums ${
-                      t.type === "income" ? "text-emerald-600" : "text-red-600"
-                    }`}
-                  >
-                    {t.type === "income" ? "+" : "-"}
-                    {rupiah.format(t.amount)}
-                  </span>
-                  {t.receipt_path && receiptUrlByPath[t.receipt_path] && (
-                    <button
-                      onClick={() => setReceiptPreview(receiptUrlByPath[t.receipt_path!])}
-                      aria-label="Lihat struk"
-                      className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
-                    >
-                      <ImageIcon size={15} />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setModal(t)}
-                    aria-label="Edit transaksi"
-                    className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
-                  >
-                    <Pencil size={15} />
-                  </button>
-                  <button
-                    disabled={pending}
-                    onClick={() => {
-                      if (confirm("Hapus transaksi ini?")) startTransition(() => deleteTransaction(t.id));
-                    }}
-                    aria-label="Hapus transaksi"
-                    className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          groups.map(({ date, items }) => (
+            <div key={date.toISOString()} className="flex flex-col gap-2">
+              <h3 className="px-1 text-xs font-semibold text-slate-500">{dayLabel(date)}</h3>
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <ul className="flex flex-col divide-y divide-slate-100">
+                  {items.map((t) => {
+                    const cat = t.category_id ? categoryMap.get(t.category_id) : undefined;
+                    return (
+                      <li key={t.id} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 active:bg-slate-100">
+                        <div
+                          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                          style={{ backgroundColor: (cat?.color ?? "#94a3b8") + "1f" }}
+                        >
+                          <CategoryIcon name={cat?.icon ?? "circle"} size={16} color={cat?.color ?? "#64748b"} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-slate-900">{cat?.name ?? "Tanpa kategori"}</p>
+                          <p className="truncate text-xs text-slate-400">
+                            {formatDate(t.occurred_at)}
+                            {t.note ? ` · ${t.note}` : ""}
+                          </p>
+                        </div>
+                        <span
+                          className={`shrink-0 text-sm font-semibold tabular-nums ${
+                            t.type === "income" ? "text-emerald-600" : "text-red-600"
+                          }`}
+                        >
+                          {t.type === "income" ? "+" : "-"}
+                          {rupiah.format(t.amount)}
+                        </span>
+                        {t.receipt_path && receiptUrlByPath[t.receipt_path] && (
+                          <button
+                            onClick={() => setReceiptPreview(receiptUrlByPath[t.receipt_path!])}
+                            aria-label="Lihat struk"
+                            className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
+                          >
+                            <ImageIcon size={15} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setModal(t)}
+                          aria-label="Edit transaksi"
+                          className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                        <button
+                          disabled={pending}
+                          onClick={() => {
+                            if (confirm("Hapus transaksi ini?")) startTransition(() => deleteTransaction(t.id));
+                          }}
+                          aria-label="Hapus transaksi"
+                          className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
