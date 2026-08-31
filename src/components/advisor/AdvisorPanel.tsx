@@ -111,7 +111,7 @@ export function AdvisorPanel() {
         <button
           onClick={() => setOpen(true)}
           aria-label="Buka AI Advisor"
-          className="fixed bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition active:scale-95 md:bottom-6 md:right-6"
+          className="fixed right-4 bottom-[calc(4rem+env(safe-area-inset-bottom)+1rem)] z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition active:scale-95 md:bottom-6 md:right-6"
         >
           <Sparkles size={22} />
         </button>
