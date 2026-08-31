@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Tags, Target, Settings, LogOut, X } from "lucide-react";
+import { Tags, Target, Settings, LogOut, X, Sparkles } from "lucide-react";
 import { logout } from "@/app/login/actions";
+import { openAdvisor } from "@/lib/advisor-events";
 
 const MORE_LINKS = [
   { href: "/goals", label: "Target", icon: Target },
@@ -24,13 +25,22 @@ export function AppHeader() {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <span className="text-lg font-semibold tracking-tight text-slate-900">Menkeu</span>
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Menu lainnya"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white"
-        >
-          M
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={openAdvisor}
+            aria-label="Buka AI Advisor"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-blue-600 hover:bg-blue-50"
+          >
+            <Sparkles size={20} />
+          </button>
+          <button
+            onClick={() => setOpen(true)}
+            aria-label="Menu lainnya"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white"
+          >
+            M
+          </button>
+        </div>
       </header>
 
       {open && (

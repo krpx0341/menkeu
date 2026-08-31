@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
-import { Sparkles, X, Send, Paperclip, Check, XCircle } from "lucide-react";
+import { X, Send, Paperclip, Check, XCircle } from "lucide-react";
 import { askAdvisor, confirmAdvisorTransaction } from "@/app/advisor/actions";
 import { rupiah } from "@/lib/format";
+import { OPEN_ADVISOR_EVENT } from "@/lib/advisor-events";
 import type { AdvisorResult } from "@/lib/types";
 
 type TxPreview = Extract<AdvisorResult, { type: "transaction_preview" }>;
@@ -37,6 +38,12 @@ export function AdvisorPanel() {
   const [image, setImage] = useState<{ mimeType: string; base64: string; name: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener(OPEN_ADVISOR_EVENT, handler);
+    return () => window.removeEventListener(OPEN_ADVISOR_EVENT, handler);
+  }, []);
 
   if (pathname === "/login") return null;
 
@@ -105,23 +112,13 @@ export function AdvisorPanel() {
     setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, status: "cancelled" } : m)));
   }
 
-  return (
-    <>
-      {!open && (
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="Buka AI Advisor"
-          className="fixed right-4 bottom-[calc(4rem+env(safe-area-inset-bottom)+1rem)] z-40 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition active:scale-95 md:bottom-6 md:right-6"
-        >
-          <Sparkles size={22} />
-        </button>
-      )}
+  if (!open) return null;
 
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col bg-white md:inset-auto md:bottom-24 md:right-6 md:h-[32rem] md:w-full md:max-w-sm md:overflow-hidden md:rounded-3xl md:border md:border-slate-200 md:shadow-2xl"
-          style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
-        >
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col bg-white md:inset-auto md:bottom-6 md:right-6 md:h-[32rem] md:w-full md:max-w-sm md:overflow-hidden md:rounded-3xl md:border md:border-slate-200 md:shadow-2xl"
+      style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 md:pb-3 md:pt-3">
             <div>
               <p className="text-sm font-semibold text-slate-900">AI Advisor</p>
@@ -236,8 +233,6 @@ export function AdvisorPanel() {
               <Send size={18} />
             </button>
           </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

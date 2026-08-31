@@ -11,8 +11,10 @@ import {
   Tags,
   Settings,
   LogOut,
+  Sparkles,
 } from "lucide-react";
 import { logout } from "@/app/login/actions";
+import { openAdvisor } from "@/lib/advisor-events";
 
 const LINKS = [
   { href: "/", label: "Beranda", icon: LayoutDashboard },
@@ -49,6 +51,13 @@ export function TopNav() {
             );
           })}
         </nav>
+        <button
+          onClick={openAdvisor}
+          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+        >
+          <Sparkles size={16} />
+          AI Advisor
+        </button>
         <form action={logout}>
           <button
             type="submit"
