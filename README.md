@@ -41,18 +41,18 @@ Brand color: blue-600 (`#2563eb`), matching the app's UI accent.
    - `0005_private_receipts.sql` — makes the `receipts` bucket private; the app fetches short-lived signed URLs to display receipt photos instead of storing a permanent public link
    - `0006_goals.sql` — `goals` table for the Milestone Goals feature
    - `0007_settings.sql` — singleton `app_settings` table holding the AI Advisor's Gemini API key (set from the app's own Settings page, not an env var)
+   - `0008_telegram_settings.sql` — singleton `telegram_settings` table holding the Telegram bot token and chat id (set from the app's own Settings page, not an env var); the webhook URL is registered there too
 
 3. **Copy `.env.example` to `.env.local`** and fill in:
 
    - `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — from your Supabase project's Settings → API. The service-role key bypasses RLS by design; never expose it to the browser or commit it.
    - `APP_PASSWORD` — the single password used to log in.
    - `SESSION_SECRET` — a long random string (`openssl rand -hex 32`). Rotating this invalidates all existing sessions.
-   - `TELEGRAM_BOT_TOKEN` — from [@BotFather](https://t.me/BotFather).
+   - `TELEGRAM_BOT_TOKEN` — optional; the Telegram bot token from [@BotFather](https://t.me/BotFather). If set, it is used only as a fallback — the preferred way is entering the token and chat id from the app's **Pengaturan** (Settings) page, which stores them in `telegram_settings` and registers the webhook for you.
    - `TELEGRAM_ALLOWED_CHAT_ID` — your Telegram chat id; the bot silently ignores messages from any other chat. Get it by messaging your bot once and checking `https://api.telegram.org/bot<token>/getUpdates`.
    - `TELEGRAM_WEBHOOK_SECRET` — a long random string; must match what you register in step 5.
-   - `OCR_API_BASE_URL` / `OCR_API_KEY` / `OCR_MODEL` — optional, an OpenAI-compatible vision endpoint for auto-extracting receipt totals. Leave blank to disable; the bot then asks you to reply with the amount instead.
 
-   The AI Advisor's Gemini API key is **not** an env var — set it from the app's own **Pengaturan** (Settings) page after logging in, at [aistudio.google.com/apikey](https://aistudio.google.com/apikey).
+   The AI (both the Advisor and receipt-photo OCR) uses **one** API key set from the app's own **Pengaturan** (Settings) page — never an env var. There is no separate OCR env block anymore. **The model must support vision** for receipt OCR to work; a text-only model still handles the Advisor chat but returns nothing for photo receipts, in which case the bot asks you to reply with the amount instead. Set the key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (Gemini) or any OpenAI-compatible endpoint via **Pengaturan → AI Advisor**. Same for the Telegram bot token, chat id, and webhook registration — all managed from **Pengaturan → Telegram Bot** (the `TELEGRAM_*` env vars below are optional fallbacks for setups that prefer env config).
 
 4. **Run locally**
 

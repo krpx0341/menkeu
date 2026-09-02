@@ -46,7 +46,18 @@ export type Goal = {
 
 export type AppSettings = {
   gemini_api_key: string | null;
+  gemini_api_key_real?: string | null; // Real Google Gemini API key for receipt OCR (separate from Vikey token)
   gemini_model: string;
+  ai_provider: "gemini" | "openai";
+  ai_base_url: string | null;
+  updated_at: string;
+};
+
+export type TelegramSettings = {
+  bot_token: string | null;
+  chat_id: string | null;
+  webhook_url: string | null;
+  webhook_secret: string | null;
   updated_at: string;
 };
 

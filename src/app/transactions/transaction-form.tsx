@@ -8,6 +8,13 @@ function todayISODate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// Formats a raw integer amount with thousand separators (5000 -> "5.000").
+function formatAmount(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("id-ID");
+}
+
 export function TransactionForm({
   categories,
   transaction,
@@ -30,6 +37,12 @@ export function TransactionForm({
 
   const defaultType: TxType = transaction?.type ?? "expense";
   const [type, setType] = useState<TxType>(defaultType);
+  // Display value keeps thousand separators while typing; the hidden input
+  // carries the clean digits so the server receives a valid number.
+  const [amountDisplay, setAmountDisplay] = useState(
+    transaction ? formatAmount(String(transaction.amount)) : ""
+  );
+  const amountRaw = amountDisplay.replace(/\D/g, "");
   const availableCategories = categories.filter((c) => !c.is_archived && c.type === type);
   const categoryStillValid =
     transaction?.category_id && availableCategories.some((c) => c.id === transaction.category_id);
@@ -40,14 +53,14 @@ export function TransactionForm({
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">Jumlah</label>
           <input
-            name="amount"
-            type="number"
-            min="0"
-            step="1"
+            value={amountDisplay}
+            onChange={(e) => setAmountDisplay(formatAmount(e.target.value))}
+            inputMode="numeric"
+            placeholder="0"
             required
-            defaultValue={transaction?.amount}
             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
           />
+          <input type="hidden" name="amount" value={amountRaw} />
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-500">Tipe</label>

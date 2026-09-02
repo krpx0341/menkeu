@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { generateContent, type GeminiContent, type GeminiPart } from "@/lib/gemini";
+import { generateStructuredJson } from "@/lib/ai";
 import type { AdvisorResult, AppSettings, Budget, Category, Goal, Transaction, TxType } from "@/lib/types";
 
 const idr = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
@@ -112,7 +112,7 @@ const SYSTEM_INSTRUCTION = `Kamu adalah asisten keuangan pribadi di aplikasi pen
 
 Kamu punya dua mode balasan, tentukan lewat field "type":
 1. "transaction_preview" — kalau pesan pengguna menceritakan SATU transaksi yang baru terjadi (mis. "beli mie ayam 25 ribu", "gajian 5 juta"). Isi amount, tx_type, category_name (pilih SATU nama paling cocok dari daftar kategori yang diberikan, jangan buat nama baru), dan note singkat. Jangan langsung simpan — ini cuma preview yang akan dikonfirmasi pengguna.
-2. "answer" — untuk semua pertanyaan atau obrolan lain (termasuk "apakah aman beli X", "pengeluaran terbesar apa", dsb). Jawab berdasarkan data yang diberikan, beri saran praktis. Ini bukan nasihat investasi formal — kalau relevan, boleh sebutkan itu singkat.
+2. "answer" — untuk semua pertanyaan atau obrolan lain (termasuk "apakah aman beli X", "pengeluaran terbesar apa", dsb). Jawab berdasarkan data yang diberikan, beri saran praktis. Field HARUS bernama "answer_text" (bukan "content" atau nama lain). Ini bukan nasihat investasi formal — kalau relevan, boleh sebutkan itu singkat.
 
 Kalau pengguna mengirim foto struk/nota, baca nominal totalnya dan balas type=transaction_preview dari situ.`;
 
@@ -126,28 +126,22 @@ export async function askAdvisor(
   const settings = settingsRow as AppSettings | null;
 
   if (!settings?.gemini_api_key) {
-    return { type: "error", message: "Tambahkan API key Gemini dulu di halaman Pengaturan untuk mengaktifkan AI Advisor." };
+    return { type: "error", message: "Tambahkan API key AI dulu di halaman Pengaturan untuk mengaktifkan AI Advisor." };
   }
 
   try {
     const { context, categories } = await buildContext(db);
 
-    const contents: GeminiContent[] = [
-      { role: "user", parts: [{ text: context }] },
-      { role: "model", parts: [{ text: JSON.stringify({ type: "answer", answer_text: "Siap, ada yang bisa dibantu?" }) }] },
-      ...history.map((h) => ({ role: h.role, parts: [{ text: h.text }] }) satisfies GeminiContent),
-    ];
-
-    const userParts: GeminiPart[] = [{ text: message || "(lihat gambar struk terlampir)" }];
-    if (image) userParts.push({ inline_data: { mime_type: image.mimeType, data: image.base64 } });
-    contents.push({ role: "user", parts: userParts });
-
-    const raw = await generateContent({
-      apiKey: settings.gemini_api_key,
-      model: settings.gemini_model,
+    const raw = await generateStructuredJson({
+      settings,
       systemInstruction: SYSTEM_INSTRUCTION,
-      contents,
-      responseSchema: RESPONSE_SCHEMA,
+      messages: [
+        { role: "user", text: context },
+        ...history,
+        { role: "user", text: message || "(lihat gambar struk terlampir)" },
+      ],
+      image,
+      schema: RESPONSE_SCHEMA,
     });
 
     const parsed = JSON.parse(raw) as {
