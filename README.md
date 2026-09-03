@@ -69,6 +69,16 @@ Brand color: blue-600 (`#2563eb`), matching the app's UI accent.
 
    Re-run this any time the deployed URL changes.
 
+## Security notes
+
+This is a single-user, self-hosted app — the security model assumes one trusted operator, not multi-tenant use. Known limitations if you fork/deploy this:
+
+- **API keys are stored in plaintext** in `app_settings.gemini_api_key` / `gemini_api_key_real` and `telegram_settings.bot_token` (see migrations `0007`, `0008`, `0012`). Anyone with database access (or a SQL injection elsewhere) reads them directly — there's no column-level encryption. Acceptable for a personal instance you alone control; don't reuse this schema as-is for a multi-user product.
+- **Login gate is a single shared password** (`APP_PASSWORD`) compared to a session cookie holding `SESSION_SECRET` in plaintext (`src/proxy.ts`), using a plain `!==` string comparison rather than a timing-safe one. There's no rate limiting on `/login`. Fine for a private instance behind your own domain; not meant to withstand a targeted attack.
+- **`SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security by design** (see `src/lib/supabase/server.ts`) — the migrations enable RLS but add no policies, since the service-role key is the only credential ever used. Never expose this key to the browser, and never add a client-side Supabase call using it.
+- **Telegram webhook auth** relies on `TELEGRAM_WEBHOOK_SECRET` matching Telegram's `secret_token` header; rotate it (and re-run `scripts/set-telegram-webhook.mjs`) if you suspect it leaked.
+- No secrets are committed to this repo — `.env.local`, `.vercel/`, and `supabase/.temp/` are gitignored, and `.env.example` only ships blank placeholders. If you fork this, double-check your own `.env.local` never gets committed.
+
 ## Deploying
 
 Deploy like any Next.js app (Vercel or self-hosted Node server both work — `src/proxy.ts` requires the Node.js runtime, which is the default). Set the same env vars from `.env.example` in your hosting provider, then run step 5 above against the production URL.
