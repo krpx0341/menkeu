@@ -1,28 +1,57 @@
-# Menkeu
+<p align="center">
+  <img src="public/brand/logo-mark.svg" width="72" alt="Menkeu logo" />
+</p>
 
-Personal finance tracker: dashboard with month-over-month comparison, a financial health score and a daily transaction calendar, transactions, budgets, milestone goals, categories, reports, an AI Advisor chat (Gemini — logs transactions from natural language with a preview-before-save step, answers questions grounded in your real data, and reads receipt photos), and a Telegram bot for logging expenses on the go (text or receipt photo).
+<h1 align="center">Menkeu</h1>
 
-Stack: Next.js 16 (App Router, Server Actions), React 19, Tailwind CSS v4, Supabase (Postgres + Storage, accessed only via the service-role key from the server), Vitest.
+<p align="center">A personal finance tracker you self-host and actually own your data in.</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Next.js-16-black" alt="Next.js 16">
+  <img src="https://img.shields.io/badge/React-19-61dafb" alt="React 19">
+  <img src="https://img.shields.io/badge/TypeScript-strict-3178c6" alt="TypeScript">
+  <img src="https://img.shields.io/badge/PWA-installable-5a0fc8" alt="Installable PWA">
+</p>
+
+Dashboard with month-over-month comparison, a financial health score and a daily transaction calendar, transactions, budgets, milestone goals, categories, reports, an **AI Advisor** chat (logs transactions from natural language with a preview-before-save step, answers questions grounded in your real data, and reads receipt photos), and a **Telegram bot** for logging expenses on the go (text or receipt photo). Single-user, self-hosted, installable as a PWA.
+
+## Screenshots
+
+| Dashboard | Transaction calendar |
+|---|---|
+| ![Dashboard](docs/screenshots/dashboard.jpg) | ![Calendar](docs/screenshots/calendar.jpg) |
+
+| Transactions | Budgets |
+|---|---|
+| ![Transactions](docs/screenshots/transactions.jpg) | ![Budgets](docs/screenshots/budgets.jpg) |
+
+| Milestone goals | Reports |
+|---|---|
+| ![Goals](docs/screenshots/goals.jpg) | ![Reports](docs/screenshots/reports.jpg) |
+
+| AI Advisor |
+|---|
+| ![AI Advisor](docs/screenshots/ai-advisor.jpg) |
+
+*(Screenshots use seeded demo data, not real financial records.)*
+
+## Features
+
+- **Dashboard** — net balance, income/expense summary, auto-generated insights, month-over-month comparison, a financial health score, and a calendar heatmap of daily activity.
+- **Transactions** — add, edit, search, and filter income/expense entries; each can carry a category, note, and receipt photo.
+- **Budgets** — set a monthly spending limit per category and track progress against it.
+- **Milestone goals** — savings targets with progress tracking and priority.
+- **Reports** — income vs. expense trend over time, expense breakdown by category.
+- **AI Advisor** — a chat panel (Gemini or any OpenAI-compatible endpoint) that logs transactions from natural language ("beli mie ayam 25rb"), answers questions grounded in your real data, and reads receipt photos.
+- **Telegram bot** — log expenses by texting or sending a receipt photo to your own bot; replies let you correct a misread amount.
+- **Installable PWA** — "Add to Home Screen" on iOS/Android for a standalone, full-screen app icon.
+
+## Stack
+
+Next.js 16 (App Router, Server Actions), React 19, Tailwind CSS v4, Supabase (Postgres + Storage, accessed only via the service-role key from the server), Vitest.
 
 Single-user app: there's no account system, just one shared password gate (`APP_PASSWORD`) via `src/proxy.ts`.
-
-Installable as a PWA (manifest at `src/app/manifest.ts`, service worker at `public/sw.js`) — "Add to Home Screen" on iOS/Android gives it a standalone, full-screen app icon. The service worker only caches this app's own static assets (`/icons/`, `/brand/`); it never caches pages or API responses, so it can't show a stale cached balance while offline.
-
-## Brand
-
-App icon source lives at `public/brand/logo-mark.svg` (regular, rounded corners) and `public/brand/logo-mark-maskable.svg` (full-bleed, for Android adaptive icons — the OS applies its own mask). All shipped icon sizes (`favicon.ico`, `src/app/icon.png`, `src/app/apple-icon.png`, `public/icons/*.png`) are rendered from these two SVGs; edit the SVGs and re-render rather than editing a PNG directly:
-
-```bash
-rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o src/app/icon.png
-rsvg-convert -w 180 -h 180 public/brand/logo-mark-maskable.svg -o src/app/apple-icon.png
-magick public/brand/logo-mark.svg -define icon:auto-resize=16,32,48,64 src/app/favicon.ico
-rsvg-convert -w 192 -h 192 public/brand/logo-mark.svg -o public/icons/icon-192.png
-rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o public/icons/icon-512.png
-rsvg-convert -w 192 -h 192 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-192.png
-rsvg-convert -w 512 -h 512 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-512.png
-```
-
-Brand color: blue-600 (`#2563eb`), matching the app's UI accent.
 
 ## Setup
 
@@ -89,3 +118,27 @@ Deploy like any Next.js app (Vercel or self-hosted Node server both work — `sr
 - `pnpm build` / `pnpm start` — production build / serve
 - `pnpm lint` — ESLint
 - `pnpm exec vitest run` — unit tests (Telegram message parsing)
+
+## Brand
+
+App icon source lives at `public/brand/logo-mark.svg` (regular, rounded corners) and `public/brand/logo-mark-maskable.svg` (full-bleed, for Android adaptive icons — the OS applies its own mask). All shipped icon sizes (`favicon.ico`, `src/app/icon.png`, `src/app/apple-icon.png`, `public/icons/*.png`) are rendered from these two SVGs; edit the SVGs and re-render rather than editing a PNG directly:
+
+```bash
+rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o src/app/icon.png
+rsvg-convert -w 180 -h 180 public/brand/logo-mark-maskable.svg -o src/app/apple-icon.png
+magick public/brand/logo-mark.svg -define icon:auto-resize=16,32,48,64 src/app/favicon.ico
+rsvg-convert -w 192 -h 192 public/brand/logo-mark.svg -o public/icons/icon-192.png
+rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o public/icons/icon-512.png
+rsvg-convert -w 192 -h 192 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-192.png
+rsvg-convert -w 512 -h 512 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-512.png
+```
+
+Brand color: blue-600 (`#2563eb`), matching the app's UI accent.
+
+## Contributing
+
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow, code conventions, and how to open a good PR.
+
+## License
+
+[MIT](LICENSE)
