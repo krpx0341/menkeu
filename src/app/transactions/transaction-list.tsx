@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Plus, Pencil, Trash2, X, Image as ImageIcon, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Image as ImageIcon, Search, Sparkles } from "lucide-react";
 import { startOfDay, startOfWeek, startOfMonth, isToday, isYesterday, format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import type { Category, Transaction, TxType } from "@/lib/types";
@@ -159,6 +159,11 @@ export function TransactionList({
                             {formatDate(t.occurred_at)}
                             {t.note ? ` · ${t.note}` : ""}
                           </p>
+                          {t.source === "advisor" && (
+                            <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-600">
+                              <Sparkles size={9} /> via AI Advisor
+                            </span>
+                          )}
                         </div>
                         <span
                           className={`shrink-0 text-sm font-semibold tabular-nums ${

@@ -2,18 +2,14 @@
 
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
-import type { Goal } from "@/lib/types";
-import { GoalCard } from "./goal-card";
-import { GoalForm } from "./goal-form";
+import type { Account } from "@/lib/types";
+import { AccountCard } from "./account-card";
+import { AccountForm } from "./account-form";
 
-export function GoalList({
-  goals,
-  suggestedEmergencyTarget,
-}: {
-  goals: Goal[];
-  suggestedEmergencyTarget: number | null;
-}) {
+export function AccountList({ accounts }: { accounts: Account[] }) {
   const [addOpen, setAddOpen] = useState(false);
+  const assets = accounts.filter((a) => !a.is_debt);
+  const debts = accounts.filter((a) => a.is_debt);
 
   return (
     <div className="flex flex-col gap-4">
@@ -21,19 +17,33 @@ export function GoalList({
         onClick={() => setAddOpen(true)}
         className="flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-500 active:scale-[0.99]"
       >
-        <Plus size={16} /> Tambah Goal
+        <Plus size={16} /> Tambah Akun
       </button>
 
-      {goals.length === 0 ? (
+      {accounts.length === 0 ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-400">Belum ada goal. Tambahkan target menabungmu.</p>
+          <p className="text-sm text-slate-400">Belum ada akun. Tambahkan rekening, dompet, atau utangmu.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {goals.map((goal) => (
-            <GoalCard key={goal.id} goal={goal} suggestedEmergencyTarget={suggestedEmergencyTarget} />
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold text-slate-900">Aset</h2>
+            {assets.length === 0 ? (
+              <p className="text-sm text-slate-400">Belum ada aset.</p>
+            ) : (
+              assets.map((a) => <AccountCard key={a.id} account={a} />)
+            )}
+          </div>
+
+          {debts.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <h2 className="text-sm font-semibold text-slate-900">Utang</h2>
+              {debts.map((a) => (
+                <AccountCard key={a.id} account={a} />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {addOpen && (
@@ -47,7 +57,7 @@ export function GoalList({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-900">Tambah Goal</h2>
+              <h2 className="text-sm font-semibold text-slate-900">Tambah Akun</h2>
               <button
                 onClick={() => setAddOpen(false)}
                 aria-label="Tutup"
@@ -56,7 +66,7 @@ export function GoalList({
                 <X size={18} />
               </button>
             </div>
-            <GoalForm suggestedEmergencyTarget={suggestedEmergencyTarget} onDone={() => setAddOpen(false)} />
+            <AccountForm onDone={() => setAddOpen(false)} />
           </div>
         </div>
       )}

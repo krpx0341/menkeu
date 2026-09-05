@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Trash2, Plus, X, Target as TargetIcon } from "lucide-react";
+import { Pencil, Trash2, Plus, X, Target as TargetIcon, ShieldAlert } from "lucide-react";
 import type { Goal } from "@/lib/types";
 import { rupiah } from "@/lib/format";
 import { addProgress, deleteGoal } from "./actions";
@@ -54,7 +54,13 @@ function getStatusBadge(goal: Goal): { label: string; className: string } | null
   return { label: "Perlu Dikejar", className: "bg-amber-50 text-amber-600" };
 }
 
-export function GoalCard({ goal }: { goal: Goal }) {
+export function GoalCard({
+  goal,
+  suggestedEmergencyTarget,
+}: {
+  goal: Goal;
+  suggestedEmergencyTarget?: number | null;
+}) {
   const [editOpen, setEditOpen] = useState(false);
   const [progressOpen, setProgressOpen] = useState(false);
   const [amount, setAmount] = useState("");
@@ -94,6 +100,11 @@ export function GoalCard({ goal }: { goal: Goal }) {
         >
           {PRIORITY_LABEL[goal.priority]}
         </span>
+        {goal.goal_type === "emergency_fund" && (
+          <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-medium text-white">
+            <ShieldAlert size={12} /> Dana Darurat
+          </span>
+        )}
       </div>
 
       <div className="flex flex-col gap-3 p-5">
@@ -202,7 +213,7 @@ export function GoalCard({ goal }: { goal: Goal }) {
                 <X size={18} />
               </button>
             </div>
-            <GoalForm goal={goal} onDone={() => setEditOpen(false)} />
+            <GoalForm goal={goal} suggestedEmergencyTarget={suggestedEmergencyTarget} onDone={() => setEditOpen(false)} />
           </div>
         </div>
       )}

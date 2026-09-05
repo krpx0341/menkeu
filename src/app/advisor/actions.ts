@@ -3,9 +3,36 @@
 import { revalidatePath } from "next/cache";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { generateStructuredJson } from "@/lib/ai";
-import type { AdvisorResult, AppSettings, Budget, Category, Goal, Transaction, TxType } from "@/lib/types";
+import type { AdvisorMessage, AdvisorResult, AppSettings, Budget, Category, Goal, Transaction, TxType } from "@/lib/types";
 
 const idr = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
+
+// Best-effort chat log so a reload can show what was said — never lets a
+// logging failure break the actual advisor flow.
+async function saveAdvisorMessage(role: "user" | "model", text: string) {
+  await supabaseAdmin()
+    .from("advisor_messages")
+    .insert({ role, text })
+    .then(
+      () => {},
+      () => {}
+    );
+}
+
+function summaryTextFor(result: AdvisorResult): string {
+  if (result.type === "answer") return result.text;
+  if (result.type === "error") return result.message;
+  return `Menyarankan mencatat ${result.txType === "income" ? "pemasukan" : "pengeluaran"} ${idr.format(result.amount)} (${result.categoryName}): "${result.note}".`;
+}
+
+export async function getAdvisorHistory(): Promise<AdvisorMessage[]> {
+  const { data } = await supabaseAdmin()
+    .from("advisor_messages")
+    .select("role, text")
+    .order("created_at", { ascending: true })
+    .limit(100);
+  return (data ?? []) as AdvisorMessage[];
+}
 
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
@@ -129,6 +156,9 @@ export async function askAdvisor(
     return { type: "error", message: "Tambahkan API key AI dulu di halaman Pengaturan untuk mengaktifkan AI Advisor." };
   }
 
+  await saveAdvisorMessage("user", message || "[Foto struk]");
+
+  let result: AdvisorResult;
   try {
     const { context, categories } = await buildContext(db);
 
@@ -155,31 +185,32 @@ export async function askAdvisor(
     };
 
     if (parsed.type === "answer") {
-      return { type: "answer", text: parsed.answer_text || "Maaf, aku belum punya jawaban untuk itu." };
+      result = { type: "answer", text: parsed.answer_text || "Maaf, aku belum punya jawaban untuk itu." };
+    } else if (!parsed.amount || parsed.amount <= 0 || (parsed.tx_type !== "income" && parsed.tx_type !== "expense")) {
+      result = { type: "answer", text: "Nominalnya belum kebaca jelas — coba tulis ulang dengan nominal yang jelas, mis. '25rb makan siang'." };
+    } else {
+      const candidates = categories.filter((c) => c.type === parsed.tx_type);
+      const matched = candidates.find((c) => c.name.toLowerCase() === (parsed.category_name ?? "").toLowerCase());
+      const fallback = candidates.find((c) => c.name.toLowerCase().startsWith("lainnya"));
+      const category = matched ?? fallback ?? null;
+
+      result = {
+        type: "transaction_preview",
+        amount: parsed.amount,
+        txType: parsed.tx_type,
+        categoryId: category?.id ?? null,
+        categoryName: category?.name ?? "Tanpa kategori",
+        note: parsed.note || message,
+        occurredAt: parsed.occurred_at ?? null,
+      };
     }
-
-    if (!parsed.amount || parsed.amount <= 0 || (parsed.tx_type !== "income" && parsed.tx_type !== "expense")) {
-      return { type: "answer", text: "Nominalnya belum kebaca jelas — coba tulis ulang dengan nominal yang jelas, mis. '25rb makan siang'." };
-    }
-
-    const candidates = categories.filter((c) => c.type === parsed.tx_type);
-    const matched = candidates.find((c) => c.name.toLowerCase() === (parsed.category_name ?? "").toLowerCase());
-    const fallback = candidates.find((c) => c.name.toLowerCase().startsWith("lainnya"));
-    const category = matched ?? fallback ?? null;
-
-    return {
-      type: "transaction_preview",
-      amount: parsed.amount,
-      txType: parsed.tx_type,
-      categoryId: category?.id ?? null,
-      categoryName: category?.name ?? "Tanpa kategori",
-      note: parsed.note || message,
-      occurredAt: parsed.occurred_at ?? null,
-    };
   } catch (err) {
     console.error("advisor error", err);
-    return { type: "error", message: "Gagal menghubungi AI Advisor. Coba lagi sebentar lagi." };
+    result = { type: "error", message: "Gagal menghubungi AI Advisor. Coba lagi sebentar lagi." };
   }
+
+  await saveAdvisorMessage("model", summaryTextFor(result));
+  return result;
 }
 
 export async function confirmAdvisorTransaction(payload: {
@@ -198,7 +229,7 @@ export async function confirmAdvisorTransaction(payload: {
       type: payload.txType,
       category_id: payload.categoryId,
       note: payload.note || null,
-      source: "web",
+      source: "advisor",
       occurred_at: payload.occurredAt ? new Date(payload.occurredAt).toISOString() : undefined,
     });
   if (error) return { error: error.message };

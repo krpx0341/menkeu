@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   Sparkles,
+  Wallet,
 } from "lucide-react";
 import { logout } from "@/app/login/actions";
 import { openAdvisor } from "@/lib/advisor-events";
@@ -19,6 +20,7 @@ import { openAdvisor } from "@/lib/advisor-events";
 const LINKS = [
   { href: "/", label: "Beranda", icon: LayoutDashboard },
   { href: "/transactions", label: "Transaksi", icon: ArrowLeftRight },
+  { href: "/accounts", label: "Akun", icon: Wallet },
   { href: "/budgets", label: "Anggaran", icon: PiggyBank },
   { href: "/goals", label: "Target", icon: Target },
   { href: "/reports", label: "Laporan", icon: BarChart3 },

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
 import { X, Send, Paperclip, Check, XCircle } from "lucide-react";
-import { askAdvisor, confirmAdvisorTransaction } from "@/app/advisor/actions";
+import { askAdvisor, confirmAdvisorTransaction, getAdvisorHistory } from "@/app/advisor/actions";
 import { rupiah } from "@/lib/format";
 import { OPEN_ADVISOR_EVENT } from "@/lib/advisor-events";
 import type { AdvisorResult } from "@/lib/types";
@@ -43,6 +43,21 @@ export function AdvisorPanel() {
     const handler = () => setOpen(true);
     window.addEventListener(OPEN_ADVISOR_EVENT, handler);
     return () => window.removeEventListener(OPEN_ADVISOR_EVENT, handler);
+  }, []);
+
+  // Loads persisted chat history once on mount (this panel is mounted once
+  // at the layout level) so closing/reloading doesn't lose past context —
+  // shown as plain read-only bubbles, without re-attaching interactive
+  // confirm/cancel actions to already-resolved (or abandoned) previews.
+  useEffect(() => {
+    getAdvisorHistory().then((history) => {
+      if (history.length === 0) return;
+      setMessages((prev) =>
+        prev.length > 0
+          ? prev
+          : history.map((m) => ({ id: crypto.randomUUID(), role: m.role, text: m.text }))
+      );
+    });
   }, []);
 
   if (pathname === "/login") return null;

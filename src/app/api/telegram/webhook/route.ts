@@ -3,7 +3,13 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { parseAmount, parseMessage } from "@/lib/telegram/parse-message";
 import { getBotToken, getTelegramSettings } from "@/lib/telegram/settings";
 import { sendTelegramMessage } from "@/lib/telegram/send-message";
+import { checkBudgetThreshold } from "@/lib/telegram/budget-alerts";
 import type { AppSettings, Category } from "@/lib/types";
+
+function currentMonthValue(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+}
 
 const idr = new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 });
 
@@ -143,6 +149,10 @@ async function handleText(text: string, messageId: number, chatId: number) {
     chatId,
     `Tersimpan: ${idr.format(parsed.amount)} (${parsed.categoryName})\n${parsed.note}`
   );
+
+  if (parsed.type === "expense" && parsed.categoryId) {
+    await checkBudgetThreshold(parsed.categoryId, currentMonthValue()).catch(() => {});
+  }
 }
 
 async function handlePhoto(message: TgMessage, chatId: number) {
@@ -230,6 +240,10 @@ async function handlePhoto(message: TgMessage, chatId: number) {
     chatId,
     `Tersimpan: ${idr.format(amount)} (${(matched ?? fallbackCategory)?.name ?? "Lainnya"})\n${note}`
   );
+
+  if (categoryId) {
+    await checkBudgetThreshold(categoryId, currentMonthValue()).catch(() => {});
+  }
 }
 
 // Inserts a placeholder (unknown-amount) expense for a receipt photo, then

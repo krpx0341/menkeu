@@ -71,6 +71,7 @@ Single-user app: there's no account system, just one shared password gate (`APP_
    - `0006_goals.sql` — `goals` table for the Milestone Goals feature
    - `0007_settings.sql` — singleton `app_settings` table holding the AI Advisor's Gemini API key (set from the app's own Settings page, not an env var)
    - `0008_telegram_settings.sql` — singleton `telegram_settings` table holding the Telegram bot token and chat id (set from the app's own Settings page, not an env var); the webhook URL is registered there too
+   - `0013_budget_groups.sql` — `budget_group` column on `categories` (needs/wants/savings) for the 50/30/20 budgeting framework
 
 3. **Copy `.env.example` to `.env.local`** and fill in:
 

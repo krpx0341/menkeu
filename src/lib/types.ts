@@ -2,6 +2,22 @@ export type TxType = "income" | "expense";
 
 export type BudgetGroup = "needs" | "wants" | "savings";
 
+export type AccountType = "cash" | "bank" | "ewallet" | "investment" | "other";
+
+export type RecurringInterval = "weekly" | "monthly" | "yearly";
+
+export type Account = {
+  id: string;
+  name: string;
+  type: AccountType;
+  balance: number;
+  is_debt: boolean;
+  interest_rate: number | null;
+  min_payment: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Category = {
   id: string;
   name: string;
@@ -19,11 +35,13 @@ export type Transaction = {
   category_id: string | null;
   note: string | null;
   occurred_at: string;
-  source: "web" | "telegram";
+  source: "web" | "telegram" | "advisor";
   telegram_message_id: number | null;
   telegram_confirm_message_id: number | null;
   receipt_path: string | null;
   raw_input: string | null;
+  is_recurring: boolean;
+  recurring_interval: RecurringInterval | null;
   created_at: string;
 };
 
@@ -32,7 +50,11 @@ export type Budget = {
   category_id: string;
   month: string; // YYYY-MM-01
   amount_limit: number;
+  notified_80: boolean;
+  notified_100: boolean;
 };
+
+export type GoalType = "emergency_fund" | "discretionary";
 
 export type Goal = {
   id: string;
@@ -41,6 +63,7 @@ export type Goal = {
   current_amount: number;
   image_url: string | null;
   priority: "low" | "medium" | "high";
+  goal_type: GoalType;
   deadline: string | null;
   is_archived: boolean;
   created_at: string;
@@ -62,6 +85,11 @@ export type TelegramSettings = {
   webhook_url: string | null;
   webhook_secret: string | null;
   updated_at: string;
+};
+
+export type AdvisorMessage = {
+  role: "user" | "model";
+  text: string;
 };
 
 export type AdvisorResult =

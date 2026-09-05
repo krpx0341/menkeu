@@ -8,6 +8,7 @@ function parseForm(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const target_amount = Number(formData.get("target_amount"));
   const priority = String(formData.get("priority") ?? "") as Goal["priority"];
+  const goal_type = String(formData.get("goal_type") ?? "discretionary") as Goal["goal_type"];
   const deadline_raw = String(formData.get("deadline") ?? "").trim();
   const image_url_raw = String(formData.get("image_url") ?? "").trim();
 
@@ -18,11 +19,14 @@ function parseForm(formData: FormData) {
   if (priority !== "low" && priority !== "medium" && priority !== "high") {
     throw new Error("Prioritas tidak valid.");
   }
+  if (goal_type !== "emergency_fund" && goal_type !== "discretionary") {
+    throw new Error("Tipe goal tidak valid.");
+  }
 
   const deadline = deadline_raw || null;
   const image_url = image_url_raw || null;
 
-  return { name, target_amount, priority, deadline, image_url };
+  return { name, target_amount, priority, goal_type, deadline, image_url };
 }
 
 export async function createGoal(_prev: string | undefined, formData: FormData) {

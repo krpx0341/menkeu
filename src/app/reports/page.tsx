@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import type { Category } from "@/lib/types";
+import type { Account, Category } from "@/lib/types";
 import IncomeExpenseBarChart, { type MonthlyTotal } from "@/components/reports/IncomeExpenseBarChart";
 import CategoryPieChart, { type CategorySlice } from "@/components/reports/CategoryPieChart";
+import IncomeStabilityCard from "@/components/reports/IncomeStabilityCard";
 
 export const dynamic = "force-dynamic";
 
@@ -41,20 +42,22 @@ export default async function ReportsPage({
 
   const supabase = supabaseAdmin();
 
-  const [{ data: categories }, { data: sixMonthTx }, { data: monthExpenseTx }] = await Promise.all([
-    supabase.from("categories").select("*"),
-    supabase
-      .from("transactions")
-      .select("amount, type, occurred_at")
-      .gte("occurred_at", sixMonthsAgoStart.toISOString())
-      .lt("occurred_at", monthEnd.toISOString()),
-    supabase
-      .from("transactions")
-      .select("amount, category_id")
-      .eq("type", "expense")
-      .gte("occurred_at", monthStart.toISOString())
-      .lt("occurred_at", monthEnd.toISOString()),
-  ]);
+  const [{ data: categories }, { data: sixMonthTx }, { data: monthExpenseTx }, { data: accountRows }] =
+    await Promise.all([
+      supabase.from("categories").select("*"),
+      supabase
+        .from("transactions")
+        .select("amount, type, occurred_at")
+        .gte("occurred_at", sixMonthsAgoStart.toISOString())
+        .lt("occurred_at", monthEnd.toISOString()),
+      supabase
+        .from("transactions")
+        .select("amount, category_id")
+        .eq("type", "expense")
+        .gte("occurred_at", monthStart.toISOString())
+        .lt("occurred_at", monthEnd.toISOString()),
+      supabase.from("accounts").select("*"),
+    ]);
 
   const catById = new Map((categories as Category[] | null ?? []).map((c) => [c.id, c]));
 
@@ -91,6 +94,13 @@ export default async function ReportsPage({
   const prevMonth = shiftMonth(month, -1);
   const nextMonth = shiftMonth(month, 1);
 
+  const accounts = (accountRows ?? []) as Account[];
+  const liquidSavings = accounts
+    .filter((a) => !a.is_debt && (a.type === "cash" || a.type === "bank" || a.type === "ewallet"))
+    .reduce((s, a) => s + a.balance, 0);
+  const monthlyIncomes = buckets.map((b) => b.income);
+  const avgMonthlyExpense = buckets.reduce((s, b) => s + b.expense, 0) / buckets.length;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -116,6 +126,12 @@ export default async function ReportsPage({
         <h2 className="mb-4 text-sm font-semibold text-slate-900">Pemasukan vs Pengeluaran (6 Bulan)</h2>
         <IncomeExpenseBarChart data={buckets} />
       </section>
+
+      <IncomeStabilityCard
+        monthlyIncomes={monthlyIncomes}
+        liquidSavings={liquidSavings}
+        avgMonthlyExpense={avgMonthlyExpense}
+      />
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-slate-900">
