@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { createCategory } from "./actions";
+import type { TxType } from "@/lib/types";
 
 export function AddCategoryForm() {
   const [error, formAction, pending] = useActionState(createCategory, undefined);
+  const [type, setType] = useState<TxType>("expense");
 
   return (
     <form
@@ -24,13 +26,29 @@ export function AddCategoryForm() {
         <label className="mb-1 block text-xs font-medium text-slate-500">Tipe</label>
         <select
           name="type"
-          defaultValue="expense"
+          value={type}
+          onChange={(e) => setType(e.target.value as TxType)}
           className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
         >
           <option value="expense">Pengeluaran</option>
           <option value="income">Pemasukan</option>
         </select>
       </div>
+      {type === "expense" && (
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-500">Kelompok 50/30/20</label>
+          <select
+            name="budget_group"
+            defaultValue=""
+            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
+          >
+            <option value="">Belum dikelompokkan</option>
+            <option value="needs">Kebutuhan (50%)</option>
+            <option value="wants">Keinginan (30%)</option>
+            <option value="savings">Tabungan (20%)</option>
+          </select>
+        </div>
+      )}
       <div>
         <label className="mb-1 block text-xs font-medium text-slate-500">Warna</label>
         <input

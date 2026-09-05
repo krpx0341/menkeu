@@ -3,10 +3,10 @@ import { parseAmount, parseMessage } from "./parse-message";
 import type { Category } from "@/lib/types";
 
 const categories: Category[] = [
-  { id: "1", name: "Makanan", type: "expense", color: "#f97316", icon: "utensils", is_archived: false },
-  { id: "2", name: "Gaji", type: "income", color: "#22c55e", icon: "wallet", is_archived: false },
-  { id: "3", name: "Lainnya (Expense)", type: "expense", color: "#64748b", icon: "more", is_archived: false },
-  { id: "4", name: "Lainnya (Income)", type: "income", color: "#84cc16", icon: "plus", is_archived: false },
+  { id: "1", name: "Makanan", type: "expense", color: "#f97316", icon: "utensils", is_archived: false, budget_group: "needs" },
+  { id: "2", name: "Gaji", type: "income", color: "#22c55e", icon: "wallet", is_archived: false, budget_group: null },
+  { id: "3", name: "Lainnya (Expense)", type: "expense", color: "#64748b", icon: "more", is_archived: false, budget_group: null },
+  { id: "4", name: "Lainnya (Income)", type: "income", color: "#84cc16", icon: "plus", is_archived: false, budget_group: null },
 ];
 
 describe("parseMessage", () => {

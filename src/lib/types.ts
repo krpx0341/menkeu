@@ -1,5 +1,7 @@
 export type TxType = "income" | "expense";
 
+export type BudgetGroup = "needs" | "wants" | "savings";
+
 export type Category = {
   id: string;
   name: string;
@@ -7,6 +9,7 @@ export type Category = {
   color: string;
   icon: string;
   is_archived: boolean;
+  budget_group: BudgetGroup | null;
 };
 
 export type Transaction = {

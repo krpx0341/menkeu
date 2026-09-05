@@ -1,6 +1,7 @@
 import { supabaseAdmin } from "@/lib/supabase/server";
-import type { Budget, Category } from "@/lib/types";
+import type { Budget, BudgetGroup, Category } from "@/lib/types";
 import BudgetForm from "./BudgetForm";
+import BudgetFrameworkCard from "@/components/budgets/BudgetFrameworkCard";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function BudgetsPage() {
 
   const supabase = supabaseAdmin();
 
-  const [{ data: categories }, { data: budgets }, { data: transactions }] = await Promise.all([
+  const [{ data: categories }, { data: budgets }, { data: expenseTx }, { data: incomeTx }] = await Promise.all([
     supabase
       .from("categories")
       .select("*")
@@ -35,15 +36,31 @@ export default async function BudgetsPage() {
       .eq("type", "expense")
       .gte("occurred_at", monthStart.toISOString())
       .lt("occurred_at", monthEnd.toISOString()),
+    supabase
+      .from("transactions")
+      .select("amount")
+      .eq("type", "income")
+      .gte("occurred_at", monthStart.toISOString())
+      .lt("occurred_at", monthEnd.toISOString()),
   ]);
 
   const cats = (categories ?? []) as Category[];
   const budgetByCategory = new Map((budgets as Budget[] | null ?? []).map((b) => [b.category_id, b]));
   const spentByCategory = new Map<string, number>();
-  for (const t of transactions ?? []) {
+  for (const t of expenseTx ?? []) {
     if (!t.category_id) continue;
     spentByCategory.set(t.category_id, (spentByCategory.get(t.category_id) ?? 0) + Number(t.amount));
   }
+
+  const catById = new Map(cats.map((c) => [c.id, c]));
+  const spentByGroup: Record<BudgetGroup, number> = { needs: 0, wants: 0, savings: 0 };
+  let uncategorizedSpent = 0;
+  for (const [categoryId, spent] of spentByCategory) {
+    const group = catById.get(categoryId)?.budget_group ?? null;
+    if (group) spentByGroup[group] += spent;
+    else uncategorizedSpent += spent;
+  }
+  const totalIncome = (incomeTx ?? []).reduce((sum, t) => sum + Number(t.amount), 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,6 +70,12 @@ export default async function BudgetsPage() {
           {new Intl.DateTimeFormat("id-ID", { month: "long", year: "numeric" }).format(monthStart)}
         </p>
       </div>
+
+      <BudgetFrameworkCard
+        totalIncome={totalIncome}
+        spentByGroup={spentByGroup}
+        uncategorizedSpent={uncategorizedSpent}
+      />
 
       <BudgetForm categories={cats} month={month} />
 
