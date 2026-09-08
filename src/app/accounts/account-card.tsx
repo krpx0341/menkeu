@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Pencil, Trash2, X, Wallet, Landmark, Smartphone, TrendingUp, CircleDollarSign } from "lucide-react";
+import { X, Wallet, Landmark, Smartphone, TrendingUp, CircleDollarSign } from "lucide-react";
 import type { Account, AccountType } from "@/lib/types";
 import { rupiah } from "@/lib/format";
+import { RowActions } from "@/components/RowActions";
 import { deleteAccount } from "./actions";
 import { AccountForm } from "./account-form";
 
@@ -45,25 +46,14 @@ export function AccountCard({ account }: { account: Account }) {
         {account.is_debt ? "-" : ""}
         {rupiah.format(account.balance)}
       </p>
-      <div className="flex shrink-0 items-center gap-0.5">
-        <button
-          onClick={() => setEditOpen(true)}
-          aria-label="Edit akun"
-          className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-        >
-          <Pencil size={14} />
-        </button>
-        <button
-          disabled={pending}
-          onClick={() => {
-            if (confirm("Hapus akun ini?")) startTransition(() => deleteAccount(account.id));
-          }}
-          aria-label="Hapus akun"
-          className="rounded-full p-2 text-slate-400 hover:bg-red-50 hover:text-red-600"
-        >
-          <Trash2 size={14} />
-        </button>
-      </div>
+      <RowActions
+        onEdit={() => setEditOpen(true)}
+        onDelete={() => {
+          if (!pending && confirm("Hapus akun ini?")) startTransition(() => deleteAccount(account.id));
+        }}
+        editLabel="Edit akun"
+        deleteLabel="Hapus akun"
+      />
 
       {editOpen && (
         <div

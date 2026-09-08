@@ -53,8 +53,8 @@ export default function TransactionCalendar({
   const selectedItems = selectedDay !== null ? (byDay.get(selectedDay)?.items ?? []) : [];
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-4 text-sm font-semibold text-slate-900">Kalender Transaksi</h2>
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
+      <h2 className="mb-4 px-2 text-sm font-semibold text-slate-900 sm:px-0">Kalender Transaksi</h2>
 
       <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-medium text-slate-400">
         {DAY_LABELS.map((d) => (

@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Plus, Pencil, Trash2, X, Image as ImageIcon, Search, Sparkles } from "lucide-react";
+import { Plus, Search, Sparkles, Image as ImageIcon, X } from "lucide-react";
 import { startOfDay, startOfWeek, startOfMonth, isToday, isYesterday, format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import type { Account, Category, Transaction, TxType } from "@/lib/types";
 import { rupiah, formatDate } from "@/lib/format";
 import { CategoryIcon } from "@/lib/icons";
+import { RowActions } from "@/components/RowActions";
 import { deleteTransaction } from "./actions";
 import { TransactionForm } from "./transaction-form";
 
@@ -184,23 +185,14 @@ export function TransactionList({
                             <ImageIcon size={15} />
                           </button>
                         )}
-                        <button
-                          onClick={() => setModal(t)}
-                          aria-label="Edit transaksi"
-                          className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-900"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                        <button
-                          disabled={pending}
-                          onClick={() => {
-                            if (confirm("Hapus transaksi ini?")) startTransition(() => deleteTransaction(t.id));
+                        <RowActions
+                          onEdit={() => setModal(t)}
+                          onDelete={() => {
+                            if (!pending && confirm("Hapus transaksi ini?")) startTransition(() => deleteTransaction(t.id));
                           }}
-                          aria-label="Hapus transaksi"
-                          className="shrink-0 rounded-full p-2.5 text-slate-400 hover:bg-red-50 hover:text-red-600"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                          editLabel="Edit transaksi"
+                          deleteLabel="Hapus transaksi"
+                        />
                       </li>
                     );
                   })}
