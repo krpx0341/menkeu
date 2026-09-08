@@ -11,6 +11,7 @@ async function parseForm(formData: FormData) {
   const amount = Number(formData.get("amount"));
   const type = String(formData.get("type") ?? "") as TxType;
   const category_id = String(formData.get("category_id") ?? "") || null;
+  const account_id = String(formData.get("account_id") ?? "") || null;
   const note = String(formData.get("note") ?? "").trim() || null;
   const occurred_at_raw = String(formData.get("occurred_at") ?? "");
   const is_recurring = formData.get("is_recurring") === "on";
@@ -18,6 +19,7 @@ async function parseForm(formData: FormData) {
 
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("Jumlah harus lebih dari 0.");
   if (type !== "income" && type !== "expense") throw new Error("Tipe tidak valid.");
+  if (!account_id) throw new Error("Akun wajib dipilih.");
   if (!occurred_at_raw) throw new Error("Tanggal wajib diisi.");
   if (is_recurring && !RECURRING_INTERVALS.includes(recurring_interval_raw as RecurringInterval)) {
     throw new Error("Interval pengulangan tidak valid.");
@@ -36,7 +38,7 @@ async function parseForm(formData: FormData) {
   const occurred_at = new Date(occurred_at_raw).toISOString();
   const recurring_interval = is_recurring ? (recurring_interval_raw as RecurringInterval) : null;
 
-  return { amount, type, category_id, note, occurred_at, is_recurring, recurring_interval };
+  return { amount, type, category_id, account_id, note, occurred_at, is_recurring, recurring_interval };
 }
 
 export async function createTransaction(_prev: string | undefined, formData: FormData) {
@@ -52,6 +54,7 @@ export async function createTransaction(_prev: string | undefined, formData: For
     return e instanceof Error ? e.message : "Gagal menyimpan transaksi.";
   }
   revalidatePath("/transactions");
+  revalidatePath("/accounts");
   revalidatePath("/");
   return undefined;
 }
@@ -65,6 +68,7 @@ export async function updateTransaction(id: string, _prev: string | undefined, f
     return e instanceof Error ? e.message : "Gagal memperbarui transaksi.";
   }
   revalidatePath("/transactions");
+  revalidatePath("/accounts");
   revalidatePath("/");
   return undefined;
 }
@@ -73,5 +77,6 @@ export async function deleteTransaction(id: string) {
   const { error } = await supabaseAdmin().from("transactions").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/transactions");
+  revalidatePath("/accounts");
   revalidatePath("/");
 }

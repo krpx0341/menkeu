@@ -33,6 +33,7 @@ export type Transaction = {
   amount: number;
   type: TxType;
   category_id: string | null;
+  account_id: string | null;
   note: string | null;
   occurred_at: string;
   source: "web" | "telegram" | "advisor";
@@ -76,6 +77,7 @@ export type AppSettings = {
   gemini_model: string;
   ai_provider: "gemini" | "openai";
   ai_base_url: string | null;
+  default_account_id: string | null;
   updated_at: string;
 };
 
@@ -99,6 +101,8 @@ export type AdvisorResult =
       txType: TxType;
       categoryId: string | null;
       categoryName: string;
+      accountId: string | null;
+      accountName: string;
       note: string;
       occurredAt: string | null; // ISO date, null = default to now on confirm
     }

@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { Plus, Pencil, Trash2, X, Image as ImageIcon, Search, Sparkles } from "lucide-react";
 import { startOfDay, startOfWeek, startOfMonth, isToday, isYesterday, format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import type { Category, Transaction, TxType } from "@/lib/types";
+import type { Account, Category, Transaction, TxType } from "@/lib/types";
 import { rupiah, formatDate } from "@/lib/format";
 import { CategoryIcon } from "@/lib/icons";
 import { deleteTransaction } from "./actions";
@@ -40,11 +40,13 @@ function dayLabel(date: Date): string {
 export function TransactionList({
   transactions,
   categories,
+  accounts,
   receiptUrlByPath,
   autoOpenAdd,
 }: {
   transactions: Transaction[];
   categories: Category[];
+  accounts: Account[];
   receiptUrlByPath: Record<string, string>;
   autoOpenAdd?: boolean;
 }) {
@@ -233,6 +235,7 @@ export function TransactionList({
             </div>
             <TransactionForm
               categories={categories}
+              accounts={accounts}
               transaction={modal === "add" ? undefined : modal}
               onDone={() => setModal(null)}
             />

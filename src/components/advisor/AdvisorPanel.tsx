@@ -114,6 +114,7 @@ export function AdvisorPanel() {
         amount: preview.amount,
         txType: preview.txType,
         categoryId: preview.categoryId,
+        accountId: preview.accountId,
         note: preview.note,
         occurredAt: preview.occurredAt,
       });

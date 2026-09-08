@@ -200,6 +200,8 @@ export async function askAdvisor(
         txType: parsed.tx_type,
         categoryId: category?.id ?? null,
         categoryName: category?.name ?? "Tanpa kategori",
+        accountId: settings.default_account_id ?? null,
+        accountName: settings.default_account_id ? "akun default" : "tanpa akun (saldo tidak diperbarui)",
         note: parsed.note || message,
         occurredAt: parsed.occurred_at ?? null,
       };
@@ -217,6 +219,7 @@ export async function confirmAdvisorTransaction(payload: {
   amount: number;
   txType: TxType;
   categoryId: string | null;
+  accountId: string | null;
   note: string;
   occurredAt: string | null;
 }): Promise<{ error?: string }> {
@@ -228,6 +231,7 @@ export async function confirmAdvisorTransaction(payload: {
       amount: payload.amount,
       type: payload.txType,
       category_id: payload.categoryId,
+      account_id: payload.accountId,
       note: payload.note || null,
       source: "advisor",
       occurred_at: payload.occurredAt ? new Date(payload.occurredAt).toISOString() : undefined,
@@ -237,5 +241,6 @@ export async function confirmAdvisorTransaction(payload: {
   revalidatePath("/");
   revalidatePath("/transactions");
   revalidatePath("/budgets");
+  revalidatePath("/accounts");
   return {};
 }

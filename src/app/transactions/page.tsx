@@ -1,5 +1,5 @@
 import { getReceiptSignedUrls, supabaseAdmin } from "@/lib/supabase/server";
-import type { Category, Transaction } from "@/lib/types";
+import type { Account, Category, Transaction } from "@/lib/types";
 import { TransactionList } from "./transaction-list";
 
 export const dynamic = "force-dynamic";
@@ -11,9 +11,10 @@ export default async function TransactionsPage({
 }) {
   const { new: autoOpenNew } = await searchParams;
   const db = supabaseAdmin();
-  const [{ data: txs }, { data: cats }] = await Promise.all([
+  const [{ data: txs }, { data: cats }, { data: accs }] = await Promise.all([
     db.from("transactions").select("*").order("occurred_at", { ascending: false }).limit(100),
     db.from("categories").select("*").order("name"),
+    db.from("accounts").select("*").order("created_at"),
   ]);
 
   const transactions = (txs ?? []) as Transaction[];
@@ -29,6 +30,7 @@ export default async function TransactionsPage({
       <TransactionList
         transactions={transactions}
         categories={(cats ?? []) as Category[]}
+        accounts={(accs ?? []) as Account[]}
         receiptUrlByPath={receiptUrlByPath}
         autoOpenAdd={autoOpenNew === "1"}
       />

@@ -125,6 +125,8 @@ async function handleText(text: string, messageId: number, chatId: number) {
     return;
   }
 
+  const accountId = (await getAppSettings())?.default_account_id ?? null;
+
   const { data, error } = await supabaseAdmin()
     .from("transactions")
     .upsert(
@@ -132,6 +134,7 @@ async function handleText(text: string, messageId: number, chatId: number) {
         amount: parsed.amount,
         type: parsed.type,
         category_id: parsed.categoryId,
+        account_id: accountId,
         note: parsed.note,
         source: "telegram",
         telegram_message_id: messageId,
@@ -147,7 +150,7 @@ async function handleText(text: string, messageId: number, chatId: number) {
 
   await sendTelegramMessage(
     chatId,
-    `Tersimpan: ${idr.format(parsed.amount)} (${parsed.categoryName})\n${parsed.note}`
+    `Tersimpan: ${idr.format(parsed.amount)} (${parsed.categoryName})\n${parsed.note}${accountId ? "" : "\n⚠️ Belum ada akun default — saldo tidak diperbarui. Atur di Pengaturan."}`
   );
 
   if (parsed.type === "expense" && parsed.categoryId) {
@@ -186,6 +189,7 @@ async function handlePhoto(message: TgMessage, chatId: number) {
   const settings = await getAppSettings();
   const aiConfigured = !!settings?.gemini_api_key_real;
   const categories = await fetchCategories();
+  const accountId = settings?.default_account_id ?? null;
 
   const fallbackCategory = categories.find((c) => c.type === "expense" && c.name.startsWith("Lainnya"));
 
@@ -224,6 +228,7 @@ async function handlePhoto(message: TgMessage, chatId: number) {
         amount,
         type: "expense",
         category_id: categoryId,
+        account_id: accountId,
         note,
         source: "telegram",
         telegram_message_id: message.message_id,
@@ -257,6 +262,7 @@ async function savePendingReceipt(
   note?: string | null
 ) {
   const supabase = supabaseAdmin();
+  const accountId = (await getAppSettings())?.default_account_id ?? null;
   const { data, error } = await supabase
     .from("transactions")
     .upsert(
@@ -264,6 +270,7 @@ async function savePendingReceipt(
         amount: PENDING_AMOUNT,
         type: "expense",
         category_id: categoryId,
+        account_id: accountId,
         note: note ?? "[struk]",
         source: "telegram",
         telegram_message_id: message.message_id,
@@ -292,7 +299,7 @@ async function savePendingReceipt(
 async function getAppSettings(): Promise<AppSettings | null> {
   const { data } = await supabaseAdmin()
     .from("app_settings")
-    .select("gemini_api_key, gemini_api_key_real, gemini_model, ai_provider, ai_base_url, updated_at")
+    .select("gemini_api_key, gemini_api_key_real, gemini_model, ai_provider, ai_base_url, default_account_id, updated_at")
     .eq("id", true)
     .maybeSingle();
   return (data as AppSettings | null) ?? null;

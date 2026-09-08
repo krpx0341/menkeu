@@ -5,6 +5,20 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import { callTelegramApi, getTelegramSettings, type BotInfo, type UpdatesResult } from "@/lib/telegram/settings";
 import { sendTelegramMessage } from "@/lib/telegram/send-message";
 
+// Save which account transactions auto-created by Telegram/AI Advisor use
+// (those flows have no per-message UI to pick an account).
+export async function saveDefaultAccount(_prev: string | undefined, formData: FormData) {
+  const accountId = String(formData.get("default_account_id") ?? "").trim() || null;
+
+  const { error } = await supabaseAdmin()
+    .from("app_settings")
+    .upsert({ id: true, default_account_id: accountId, updated_at: new Date().toISOString() });
+  if (error) return error.message;
+
+  revalidatePath("/settings");
+  return undefined;
+}
+
 // --- Gemini (AI Advisor) ---
 
 export async function saveGeminiSettings(_prev: string | undefined, formData: FormData) {

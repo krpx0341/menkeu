@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import type { Category, Transaction, TxType } from "@/lib/types";
+import type { Account, Category, Transaction, TxType } from "@/lib/types";
 import { createTransaction, updateTransaction } from "./actions";
 
 function todayISODate() {
@@ -18,10 +18,12 @@ function formatAmount(raw: string): string {
 
 export function TransactionForm({
   categories,
+  accounts,
   transaction,
   onDone,
 }: {
   categories: Category[];
+  accounts: Account[];
   transaction?: Transaction;
   onDone: () => void;
 }) {
@@ -42,6 +44,7 @@ export function TransactionForm({
   const categoryStillValid =
     transaction?.category_id && availableCategories.some((c) => c.id === transaction.category_id);
   const [categoryId, setCategoryId] = useState(categoryStillValid ? transaction?.category_id ?? "" : "");
+  const [accountId, setAccountId] = useState(transaction?.account_id ?? accounts[0]?.id ?? "");
   // Remembers the last category picked per type, so toggling the type
   // select back and forth (an adjacent, easy-to-fat-finger control) doesn't
   // throw away what you already picked.
@@ -97,6 +100,24 @@ export function TransactionForm({
             <option value="income">Pemasukan</option>
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs font-medium text-slate-500">Akun</label>
+        <select
+          name="account_id"
+          required
+          value={accountId}
+          onChange={(e) => setAccountId(e.target.value)}
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:bg-white"
+        >
+          {accounts.length === 0 && <option value="">Belum ada akun</option>}
+          {accounts.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div>
