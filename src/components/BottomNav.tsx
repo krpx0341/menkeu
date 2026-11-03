@@ -46,8 +46,18 @@ export function BottomNav() {
 
   return (
     <>
+      {/* Perbaikan bar bawah iPhone (sering "keangkat"):
+          1. Background solid, bukan white/95 + backdrop-blur — blur di
+             elemen fixed adalah pemicu utama lompatan render di Safari iOS.
+          2. transform-gpu: paksa compositing layer sendiri supaya posisi
+             fixed tidak ikut goyang saat Safari menyembunyikan/menampilkan
+             chrome-nya ketika scroll.
+          3. Tombol + tidak lagi menonjol 28px ke atas bar (dulu
+             top-0 -translate-y-1/2, jadi menutupi teks card di bawahnya
+             dan bar terlihat "naik"). Sekarang tombol duduk di tengah bar,
+             di slot kosong grid 5 kolom yang memang disediakan untuknya. */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white transform-gpu md:hidden"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="relative mx-auto grid h-16 max-w-lg grid-cols-5 items-stretch">
@@ -69,7 +79,7 @@ export function BottomNav() {
           <Link
             href="/transactions?new=1"
             aria-label="Tambah transaksi"
-            className="absolute left-1/2 top-0 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition active:scale-95"
+            className="absolute left-1/2 top-1/2 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg shadow-blue-600/30 transition active:scale-95"
           >
             <Plus size={26} />
           </Link>

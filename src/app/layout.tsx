@@ -41,10 +41,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-slate-50 text-slate-900">
+      {/* min-h-dvh (bukan min-h-full): tinggi layout mengikuti viewport
+          dinamis iOS, jadi tidak melompat saat chrome Safari muncul/hilang.
+          Padding bawah mobile dinaikkan 5rem -> 6.5rem: bar bawah setinggi
+          64px + safe-area, dan konten terakhir tidak boleh bersembunyi di
+          balik bar/tombol + itu. */}
+      <body className="min-h-dvh bg-slate-50 text-slate-900">
         <TopNav />
         <AppHeader />
-        <main className="mx-auto max-w-6xl px-4 pb-[calc(5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 md:px-8 md:pb-10 md:pt-8">
+        <main className="mx-auto max-w-6xl px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 md:px-8 md:pb-10 md:pt-8">
           {children}
         </main>
         <BottomNav />

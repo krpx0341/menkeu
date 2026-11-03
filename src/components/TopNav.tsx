@@ -32,41 +32,56 @@ export function TopNav() {
   const pathname = usePathname();
   if (pathname === "/login") return null;
 
+  // Dulu 8 link berlabel penuh + 2 tombol di lebar tablet (md) meluber dan
+  // terlihat "aneh". Sekarang: brand kiri (icon baru + nama), link berupa
+  // icon saja di md–lg dan berlabel penuh baru di xl, utilitas kanan juga
+  // icon saja sampai lg. Background solid, bukan blur (lihat AppHeader).
   return (
-    <header className="sticky top-0 z-20 hidden border-b border-slate-200 bg-white/95 backdrop-blur md:block">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-6">
-        <span className="text-lg font-semibold tracking-tight text-slate-900">Menkeu</span>
-        <nav className="flex flex-1 items-center gap-1">
+    <header className="sticky top-0 z-20 hidden border-b border-slate-200 bg-white md:block">
+      <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-6">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          {/* eslint-disable-next-line @next/next/no-img-element -- /icons is a static PWA asset, not a remote image */}
+          <img
+            src="/icons/icon-192.png"
+            alt=""
+            width={32}
+            height={32}
+            className="rounded-[9px]"
+          />
+          <span className="text-lg font-semibold tracking-tight text-slate-900">Menkeu</span>
+        </Link>
+        <nav className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
           {LINKS.map(({ href, label, icon: Icon }) => {
             const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
+                title={label}
+                className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${
                   active ? "bg-blue-50 text-blue-600" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 <Icon size={16} />
-                {label}
+                <span className="hidden xl:inline">{label}</span>
               </Link>
             );
           })}
         </nav>
         <button
           onClick={openAdvisor}
-          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+          className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
         >
           <Sparkles size={16} />
-          AI Advisor
+          <span className="hidden lg:inline">AI Advisor</span>
         </button>
-        <form action={logout}>
+        <form action={logout} className="shrink-0">
           <button
             type="submit"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
           >
             <LogOut size={16} />
-            Keluar
+            <span className="hidden lg:inline">Keluar</span>
           </button>
         </form>
       </div>

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/brand/logo-mark.svg" width="72" alt="Menkeu logo" />
+  <img src="public/icons/icon-512.png" width="72" alt="Menkeu logo" />
 </p>
 
 <h1 align="center">Menkeu</h1>
@@ -122,17 +122,19 @@ Deploy like any Next.js app (Vercel or self-hosted Node server both work — `sr
 
 ## Brand
 
-App icon source lives at `public/brand/logo-mark.svg` (regular, rounded corners) and `public/brand/logo-mark-maskable.svg` (full-bleed, for Android adaptive icons — the OS applies its own mask). All shipped icon sizes (`favicon.ico`, `src/app/icon.png`, `src/app/apple-icon.png`, `public/icons/*.png`) are rendered from these two SVGs; edit the SVGs and re-render rather than editing a PNG directly:
+App icon source (since 2026-11-03) is `public/brand/menkeu-icon-source.jpg` — Han's
+supplied icon, a red rounded square on a black background. All shipped icon
+sizes are rendered from it by `scripts/generate-icons.py`, which auto-crops
+the black margin to the red square first; never edit a PNG directly:
 
 ```bash
-rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o src/app/icon.png
-rsvg-convert -w 180 -h 180 public/brand/logo-mark-maskable.svg -o src/app/apple-icon.png
-magick public/brand/logo-mark.svg -define icon:auto-resize=16,32,48,64 src/app/favicon.ico
-rsvg-convert -w 192 -h 192 public/brand/logo-mark.svg -o public/icons/icon-192.png
-rsvg-convert -w 512 -h 512 public/brand/logo-mark.svg -o public/icons/icon-512.png
-rsvg-convert -w 192 -h 192 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-192.png
-rsvg-convert -w 512 -h 512 public/brand/logo-mark-maskable.svg -o public/icons/icon-maskable-512.png
+python3 scripts/generate-icons.py
 ```
+
+This regenerates `src/app/icon.png` (512), `src/app/apple-icon.png` (180),
+`src/app/favicon.ico` (16/32/48), and `public/icons/icon-*.png` +
+`icon-maskable-*.png` (192/512). The old `logo-mark*.svg` files are kept
+for reference only and are no longer the icon source.
 
 Brand color: blue-600 (`#2563eb`), matching the app's UI accent.
 

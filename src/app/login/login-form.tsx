@@ -12,8 +12,8 @@ export function LoginForm({ next }: { next: string }) {
       className="w-full max-w-[320px] rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
     >
       <div className="mb-6 flex flex-col items-center text-center">
-        {/* eslint-disable-next-line @next/next/no-img-element -- local SVG, next/image's optimizer blocks SVGs by default */}
-        <img src="/brand/logo-mark.svg" alt="" width={48} height={48} className="mb-3 h-12 w-12 rounded-2xl" />
+        {/* eslint-disable-next-line @next/next/no-img-element -- /icons is a static PWA asset, not a remote image */}
+        <img src="/icons/icon-192.png" alt="" width={48} height={48} className="mb-3 h-12 w-12 rounded-2xl" />
         <h1 className="text-xl font-semibold tracking-tight text-slate-900">Menkeu</h1>
         <p className="mt-1 text-sm text-slate-500">Masuk untuk lihat keuangan kamu.</p>
       </div>

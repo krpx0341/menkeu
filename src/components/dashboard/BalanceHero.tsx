@@ -41,6 +41,13 @@ export default function BalanceHero({
     });
   }
 
+  // Card ini sekarang hidup di dalam DashboardHeroCards yang bisa diketuk
+  // untuk ganti card — ketuk tombol mata tidak boleh ikut mengganti card.
+  function toggleWithoutSwitching(e: React.MouseEvent) {
+    e.stopPropagation();
+    toggle();
+  }
+
   const show = (n: number) => (hidden ? "Rp ••••••" : rupiah.format(n));
 
   return (
@@ -51,7 +58,7 @@ export default function BalanceHero({
         <div className="flex items-center justify-between">
           <p className="text-sm text-blue-100">Saldo Bersih Bulan Ini</p>
           <button
-            onClick={toggle}
+            onClick={toggleWithoutSwitching}
             aria-label={hidden ? "Tampilkan saldo" : "Sembunyikan saldo"}
             className="rounded-full p-1.5 text-blue-100 hover:bg-white/10 hover:text-white"
           >

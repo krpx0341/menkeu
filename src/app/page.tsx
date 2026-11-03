@@ -3,8 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase/server";
 import type { Account, Budget, Category, RecurringInterval, Transaction } from "@/lib/types";
 import { rupiah, formatDate } from "@/lib/format";
 import { CategoryIcon } from "@/lib/icons";
-import BalanceHero from "@/components/dashboard/BalanceHero";
-import LivingAllowanceCard from "@/components/dashboard/LivingAllowanceCard";
+import DashboardHeroCards from "@/components/dashboard/DashboardHeroCards";
 import InsightCard from "@/components/dashboard/InsightCard";
 import MonthComparisonCard from "@/components/dashboard/MonthComparisonCard";
 import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
@@ -219,17 +218,20 @@ export default async function DashboardPage() {
         hasBudget={(allTimeBudgetCount ?? 0) > 0}
       />
 
-      {livingRemaining !== null && (
-        <LivingAllowanceCard
-          remaining={livingRemaining}
-          salaryAmount={salaryAmount}
-          salaryNote={salaryNote}
-          daysLeft={daysLeft}
-          lastDayLabel={lastDayLabel}
-        />
-      )}
-
-      <BalanceHero net={net} totalIncome={totalIncome} totalExpense={totalExpense} />
+      <DashboardHeroCards
+        living={
+          livingRemaining !== null
+            ? {
+                remaining: livingRemaining,
+                salaryAmount,
+                salaryNote,
+                daysLeft,
+                lastDayLabel,
+              }
+            : null
+        }
+        balance={{ net, totalIncome, totalExpense }}
+      />
 
       <InsightCard
         totalIncome={totalIncome}
