@@ -89,7 +89,7 @@ export function GoalCard({
       <div className="relative">
         {goal.image_url ? (
           // eslint-disable-next-line @next/next/no-img-element -- user-supplied external URL, not a static/optimizable asset
-          <img src={goal.image_url} alt={goal.name} className="h-32 w-full object-cover" />
+          <img src={goal.image_url} alt={goal.name} className="h-24 w-full object-cover sm:h-32" />
         ) : (
           <div className={`flex h-32 w-full items-center justify-center ${PRIORITY_BANNER_CLASS[goal.priority]}`}>
             <TargetIcon size={32} className={PRIORITY_ICON_CLASS[goal.priority]} />

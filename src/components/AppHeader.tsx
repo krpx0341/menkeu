@@ -10,7 +10,7 @@ export function AppHeader() {
 
   return (
     <header
-      className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:hidden"
+      className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:hidden"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
     >
       <span className="text-lg font-semibold tracking-tight text-slate-900">Menkeu</span>

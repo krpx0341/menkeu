@@ -9,7 +9,7 @@ export function LoginForm({ next }: { next: string }) {
   return (
     <form
       action={formAction}
-      className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+      className="w-full max-w-[320px] rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
     >
       <div className="mb-6 flex flex-col items-center text-center">
         {/* eslint-disable-next-line @next/next/no-img-element -- local SVG, next/image's optimizer blocks SVGs by default */}

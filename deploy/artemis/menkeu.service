@@ -1,0 +1,29 @@
+[Unit]
+Description=Menkeu Next.js
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=menkeu
+Group=menkeu
+WorkingDirectory=/opt/menkeu/current
+EnvironmentFile=/etc/menkeu.env
+Environment=NODE_ENV=production
+Environment=HOSTNAME=127.0.0.1
+Environment=PORT=3101
+Environment=NODE_OPTIONS=--max-old-space-size=256
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+MemoryHigh=256M
+MemoryMax=320M
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/menkeu
+
+[Install]
+WantedBy=multi-user.target

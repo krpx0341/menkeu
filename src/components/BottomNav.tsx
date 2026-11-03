@@ -58,7 +58,7 @@ export function BottomNav() {
           <TabLink {...TABS[2]} active={isActive(pathname, TABS[2].href)} />
           <button
             onClick={() => setMoreOpen(true)}
-            className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition ${
+            className={`flex flex-col items-center justify-center gap-0.5 text-xs font-medium transition min-h-[44px] ${
               onMoreLink ? "text-blue-600" : "text-slate-400"
             }`}
           >
@@ -139,7 +139,7 @@ function TabLink({
   return (
     <Link
       href={href}
-      className={`flex flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition ${
+      className={`flex min-h-[44px] flex-col items-center justify-center gap-0.5 text-xs font-medium transition ${
         active ? "text-blue-600" : "text-slate-400"
       }`}
     >

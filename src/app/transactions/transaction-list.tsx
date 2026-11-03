@@ -110,7 +110,7 @@ export function TransactionList({
             <button
               key={f.value}
               onClick={() => setTypeFilter(f.value)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              className={`min-h-[44px] rounded-full px-3 py-2 text-xs font-medium transition ${
                 typeFilter === f.value ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
               }`}
             >
@@ -123,7 +123,7 @@ export function TransactionList({
             <button
               key={f.value}
               onClick={() => setRangeFilter(f.value)}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-medium transition ${
+              className={`min-h-[44px] flex-1 rounded-lg px-2 py-2 text-xs font-medium transition ${
                 rangeFilter === f.value ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
               }`}
             >
@@ -149,7 +149,7 @@ export function TransactionList({
                   {items.map((t) => {
                     const cat = t.category_id ? categoryMap.get(t.category_id) : undefined;
                     return (
-                      <li key={t.id} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 active:bg-slate-100">
+                      <li key={t.id} className="flex items-center gap-3 px-3 py-3 sm:px-5 hover:bg-slate-50 active:bg-slate-100">
                         <div
                           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
                           style={{ backgroundColor: (cat?.color ?? "#94a3b8") + "1f" }}
