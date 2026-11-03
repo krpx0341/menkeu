@@ -4,6 +4,7 @@ import type { Account, Budget, Category, RecurringInterval, Transaction } from "
 import { rupiah, formatDate } from "@/lib/format";
 import { CategoryIcon } from "@/lib/icons";
 import BalanceHero from "@/components/dashboard/BalanceHero";
+import LivingAllowanceCard from "@/components/dashboard/LivingAllowanceCard";
 import InsightCard from "@/components/dashboard/InsightCard";
 import MonthComparisonCard from "@/components/dashboard/MonthComparisonCard";
 import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
@@ -180,6 +181,31 @@ export default async function DashboardPage() {
   const totalUpcomingBills = upcomingBills.reduce((s, b) => s + b.amount, 0);
   const safeToSpend = net - totalUpcomingBills;
 
+  // Sisa Uang Hidup: saldo akun Tunai (akumulatif, bukan arus bulanan) +
+  // gaji terakhir untuk konteks. Akun Tunai dipilih by name — tidak ada
+  // akun lain yang boleh dipakai sebagai uang hidup harian.
+  const tunaiAccount = [...accounts]
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    .find((a) => a.name === "Tunai" && a.type === "cash" && !a.is_debt);
+  const livingRemaining = tunaiAccount ? Number(tunaiAccount.balance) : null;
+  const { data: recentIncomes } = await db
+    .from("transactions")
+    .select("amount, note, occurred_at")
+    .eq("type", "income")
+    .order("occurred_at", { ascending: false })
+    .limit(50);
+  const salaryTx = ((recentIncomes ?? []) as { amount: number; note: string | null }[]).find(
+    (t) => t.note?.toLowerCase().startsWith("gaji"),
+  );
+  const salaryAmount = salaryTx ? Number(salaryTx.amount) : null;
+  const salaryNote = salaryTx?.note ?? null;
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const daysLeft = Math.max(lastDayOfMonth.getDate() - now.getDate() + 1, 0);
+  const lastDayLabel = new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+  }).format(lastDayOfMonth);
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -192,6 +218,16 @@ export default async function DashboardPage() {
         hasTransaction={(allTimeTransactionCount ?? 0) > 0}
         hasBudget={(allTimeBudgetCount ?? 0) > 0}
       />
+
+      {livingRemaining !== null && (
+        <LivingAllowanceCard
+          remaining={livingRemaining}
+          salaryAmount={salaryAmount}
+          salaryNote={salaryNote}
+          daysLeft={daysLeft}
+          lastDayLabel={lastDayLabel}
+        />
+      )}
 
       <BalanceHero net={net} totalIncome={totalIncome} totalExpense={totalExpense} />
 
